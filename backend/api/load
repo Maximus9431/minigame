@@ -1,0 +1,10 @@
+const express = require('express');
+const router = express.Router();
+
+router.get('/:userId', (req, res) => {
+    // Загружаем прогресс пользователя по userId
+    // ...
+    res.json({ player: {/* ... */} });
+});
+
+module.exports = router;

@@ -1,0 +1,10 @@
+const express = require('express');
+const router = express.Router();
+
+router.post('/', (req, res) => {
+    // Сохраняем прогресс пользователя по userId
+    // ...
+    res.json({ success: true });
+});
+
+module.exports = router;
