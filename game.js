@@ -601,3 +601,15 @@ if (window.Telegram && Telegram.WebApp) {
     Telegram.WebApp.BackButton.show();
     Telegram.WebApp.BackButton.onClick(() => Telegram.WebApp.close());
 }
+
+// Сначала объявите функцию
+function updatePetsCollection() {
+    // ...ваш код для обновления коллекции питомцев...
+}
+
+// Потом объявляйте/вызывайте loadGame и другие функции, которые используют updatePetsCollection
+function loadGame() {
+    // ...ваш код...
+    updatePetsCollection();
+    // ...ваш код...
+}
