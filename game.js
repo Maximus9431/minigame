@@ -599,7 +599,7 @@ giveDailyBonus();
 
 if (window.Telegram && Telegram.WebApp) {
     Telegram.WebApp.ready();
-    // Можно использовать Telegram.WebApp.initData, Telegram.WebApp.sendData и т.д.
+    Telegram.WebApp.expand(); // Открыть WebApp на весь экран
 }
 
 // Сначала объявите функцию
@@ -639,6 +639,15 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 // По умолчанию показываем первую вкладку
 document.querySelector('.nav-btn[data-tab="game"]').classList.add('active');
 document.getElementById('tab-game').style.display = 'block';
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function(event) {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
 
 document.addEventListener('gesturestart', function (e) {
     e.preventDefault();

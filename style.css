@@ -1,3 +1,8 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
 body {
     min-height: 100vh;
     margin: 0;
@@ -26,7 +31,18 @@ body::after {
     background: radial-gradient(circle at 70% 60%, #ffb30077 0%, #ffe08200 80%);
     filter: blur(40px); opacity: 0.6;
 }
-#main { max-width: 350px; margin: 40px auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 24px #0001; padding: 24px; text-align: center; }
+#main {
+    max-width: 350px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px #0001;
+    padding: 24px;
+    text-align: center;
+    min-height: 100vh;
+    min-width: 100vw;
+    box-sizing: border-box;
+}
 #cat-area {
     position: relative;
     margin: 20px 0;
