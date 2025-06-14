@@ -113,6 +113,13 @@ catImg.addEventListener('click', autoSaveWrap(function(e) {
     document.getElementById('cat-area').appendChild(coin);
     setTimeout(() => coin.remove(), 700);
 
+    // Шанс получить единорога при каждом клике!
+    if (!ownedPets.unicorn && Math.random() < 1/200) { // 1 к 200 — можно изменить шанс
+        ownedPets.unicorn = true;
+        updatePetsCollection();
+        showNotification('Поздравляем! Вам выпал редкий питомец: Единорог 🦄');
+    }
+
     state.totalClicks++;
     checkAchievements(state);
     checkSkinsAchievements();
@@ -257,11 +264,11 @@ let ownedPets = { dog: false, bird: false, cat: false, unicorn: false };
 let currentPet = null;
 
 function updatePetInfo() {
-    let name = 'нет';
-    if (currentPet === 'dog') name = 'Собачка';
-    if (currentPet === 'bird') name = 'Птичка';
-    if (currentPet === 'cat') name = 'Котёнок';
-    if (currentPet === 'unicorn') name = 'Единорог';
+    let name = 'no';
+    if (currentPet === 'dog') name = 'Dog';
+    if (currentPet === 'bird') name = 'Bird';
+    if (currentPet === 'cat') name = 'Cat';
+    if (currentPet === 'unicorn') name = 'Unicorn';
     document.getElementById('current-pet').textContent = name;
 }
 
@@ -269,19 +276,19 @@ function updatePetImage() {
     const petImg = document.getElementById('pet-img');
     if (currentPet === 'dog') {
         petImg.src = 'pet_dog.png';
-        petImg.alt = 'Собачка';
+        petImg.alt = 'Dog';
         petImg.style.display = '';
     } else if (currentPet === 'bird') {
         petImg.src = 'pet_bird.png';
-        petImg.alt = 'Птичка';
+        petImg.alt = 'Bird';
         petImg.style.display = '';
     } else if (currentPet === 'cat') {
         petImg.src = 'pet_cat.png';
-        petImg.alt = 'Котёнок';
+        petImg.alt = 'Cat';
         petImg.style.display = '';
     } else if (currentPet === 'unicorn') {
         petImg.src = 'pet_unicorn.png';
-        petImg.alt = 'Единорог';
+        petImg.alt = 'Unicorn';
         petImg.style.display = '';
     } else {
         petImg.style.display = 'none';
@@ -365,7 +372,7 @@ setInterval(function() {
 }, 1000);
 
 // Шанс получить единорога — 1 к 2000 кликов
-if (!ownedPets.unicorn && Math.random() < 1/2000) {
+if (!ownedPets.unicorn && Math.random() < 1/200) {
     ownedPets.unicorn = true;
     updatePetsCollection();
     showNotification('Поздравляем! Вам выпал редкий питомец: Единорог 🦄');
@@ -643,4 +650,13 @@ document.addEventListener('touchend', function(event) {
 
 document.addEventListener('gesturestart', function (e) {
     e.preventDefault();
+});
+
+// Покупка/выбор единорога
+document.getElementById('pet-unicorn').onclick = autoSaveWrap(function() {
+    if (!ownedPets.unicorn) return showNotification('Сначала получите единорога!');
+    currentPet = 'unicorn';
+    updatePetInfo();
+    updatePetImage();
+    showNotification('Единорог выбран! +5 к пассивному доходу');
 });
