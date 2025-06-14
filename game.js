@@ -114,7 +114,7 @@ catImg.addEventListener('click', autoSaveWrap(function(e) {
     setTimeout(() => coin.remove(), 700);
 
     // Шанс получить единорога при каждом клике!
-    if (!ownedPets.unicorn && Math.random() < 1/200) { // 1 к 200 — можно изменить шанс
+    if (!ownedPets.unicorn && Math.random() < 1/10) { // 1 к 10 — можно изменить шанс
         ownedPets.unicorn = true;
         updatePetsCollection();
         showNotification('Поздравляем! Вам выпал редкий питомец: Единорог 🦄');
