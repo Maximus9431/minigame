@@ -640,15 +640,6 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
 document.querySelector('.nav-btn[data-tab="game"]').classList.add('active');
 document.getElementById('tab-game').style.display = 'block';
 
-let lastTouchEnd = 0;
-document.addEventListener('touchend', function(event) {
-    const now = Date.now();
-    if (now - lastTouchEnd <= 300) {
-        event.preventDefault();
-    }
-    lastTouchEnd = now;
-}, false);
-
 document.addEventListener('gesturestart', function (e) {
     e.preventDefault();
 });
