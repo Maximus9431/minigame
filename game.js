@@ -602,6 +602,7 @@ if (window.Telegram && Telegram.WebApp) {
     // Можно использовать Telegram.WebApp.initData, Telegram.WebApp.sendData и т.д.
 }
 
+// Сначала объявите функцию
 function updatePetsCollection() {
     document.getElementById('coll-dog').style.opacity = ownedPets.dog ? '1' : '0.3';
     document.getElementById('coll-bird').style.opacity = ownedPets.bird ? '1' : '0.3';
