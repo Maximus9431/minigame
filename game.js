@@ -599,11 +599,7 @@ giveDailyBonus();
 
 if (window.Telegram && Telegram.WebApp) {
     Telegram.WebApp.ready();
-    Telegram.WebApp.MainButton.setText("Отправить результат");
-    Telegram.WebApp.MainButton.show();
-    Telegram.WebApp.MainButton.onClick(function() {
-        Telegram.WebApp.sendData("Привет из мини-игры!");
-    });
+    // Можно использовать Telegram.WebApp.initData, Telegram.WebApp.sendData и т.д.
 }
 
 function updatePetsCollection() {
