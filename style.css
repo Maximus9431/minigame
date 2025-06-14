@@ -117,3 +117,6 @@ body { margin: 0; font-family: Arial, sans-serif; background: #f9f6ee; padding-b
         padding: 6px 0;
     }
 }
+#cat-img, .ui-btn, button, .nav-btn {
+    touch-action: manipulation;
+}
