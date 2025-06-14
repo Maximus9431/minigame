@@ -81,6 +81,8 @@ let state = {
 
 let boosterActive = false;
 let boosterTimeout = null;
+let boosterTimeLeft = 0;
+let boosterInterval = null;
 
 function setBoosterActive(active) {
     boosterActive = active;
@@ -89,6 +91,15 @@ function setBoosterActive(active) {
         showNotification('Бустер активирован! x2 монеты на 30 сек');
     } else {
         showNotification('Бустер закончился');
+    }
+}
+
+function updateBoosterTimerUI() {
+    const el = document.getElementById('booster-timer');
+    if (boosterTimeLeft > 0) {
+        el.textContent = `Осталось: ${boosterTimeLeft} сек.`;
+    } else {
+        el.textContent = '';
     }
 }
 
@@ -144,7 +155,7 @@ let autoclickTimerInterval = null;
 function updateAutoclickTimerUI() {
     const timerDiv = document.getElementById('autoclick-timer');
     if (autoclick && autoclickTimeLeft > 0) {
-        timerDiv.textContent = `Автокликер: ${autoclickTimeLeft} сек.`;
+        timerDiv.textContent = `Autoclicker: ${autoclickTimeLeft} sec.`;
     } else {
         timerDiv.textContent = '';
     }
@@ -152,15 +163,17 @@ function updateAutoclickTimerUI() {
 
 // Автокликер на время
 document.getElementById('autoclick-btn').onclick = autoSaveWrap(function() {
-    if (autoclick) return showNotification('Автокликер уже активен!');
     if (coins < 50) return showNotification('Недостаточно монет!');
     coins -= 50;
     autoclick = true;
-    autoclickTimeLeft = 60;
+    autoclickTimeLeft = 60; // сбрасываем таймер
     updateUI();
-    updateAutoclickTimerUI();
+    updateAutoclickTimerUI(); // обязательно обновляем таймер на экране
     showNotification('Автокликер активирован на 60 секунд!');
     document.getElementById('autoclick-btn').disabled = true;
+
+    // Если уже был автокликер — сбрасываем старый интервал
+    if (window._autoclickerInterval) clearInterval(window._autoclickerInterval);
 
     // Запуск автокликера
     window._autoclickerInterval = setInterval(() => {
@@ -169,18 +182,18 @@ document.getElementById('autoclick-btn').onclick = autoSaveWrap(function() {
         saveGame();
     }, 1000);
 
-    // Запуск таймера отображения
-    autoclickTimerInterval = setInterval(() => {
+    // Запуск таймера автокликера
+    if (window._autoclickerTimer) clearInterval(window._autoclickerTimer);
+    window._autoclickerTimer = setInterval(() => {
         autoclickTimeLeft--;
         updateAutoclickTimerUI();
         if (autoclickTimeLeft <= 0) {
             clearInterval(window._autoclickerInterval);
-            clearInterval(autoclickTimerInterval);
+            clearInterval(window._autoclickerTimer);
             autoclick = false;
             document.getElementById('autoclick-btn').disabled = false;
             updateAutoclickTimerUI();
-            showNotification('Автокликер отключён!');
-            saveGame();
+            showNotification('Автокликер закончился!');
         }
     }, 1000);
 });
@@ -203,12 +216,29 @@ document.getElementById('buy-cat3').onclick = autoSaveWrap(function() {
 
 // Бустер
 document.getElementById('booster-btn').onclick = autoSaveWrap(function() {
-    if (boosterActive) return showNotification('Бустер уже активен!');
-    if (coins < 20) return showNotification('Недостаточно монет!');
-    coins -= 20;
-    setBoosterActive(true);
+    if (coins < 100) return showNotification('Недостаточно монет!');
+    coins -= 100;
+    boosterActive = true;
+    boosterTimeLeft = 30; // или сколько нужно секунд
     updateUI();
-    boosterTimeout = setTimeout(() => setBoosterActive(false), 30000);
+    updateBoosterTimerUI();
+    showNotification('Бустер x2 активирован на 30 секунд!');
+    document.getElementById('booster-btn').disabled = true;
+
+    // Сбросить старый интервал, если был
+    if (boosterInterval) clearInterval(boosterInterval);
+
+    boosterInterval = setInterval(() => {
+        boosterTimeLeft--;
+        updateBoosterTimerUI();
+        if (boosterTimeLeft <= 0) {
+            clearInterval(boosterInterval);
+            boosterActive = false;
+            document.getElementById('booster-btn').disabled = false;
+            updateBoosterTimerUI();
+            showNotification('Бустер закончился!');
+        }
+    }, 1000);
 });
 
 // Скины
@@ -495,15 +525,17 @@ document.getElementById('upgrade-btn').onclick = autoSaveWrap(function() {
 });
 
 document.getElementById('autoclick-btn').onclick = autoSaveWrap(function() {
-    if (autoclick) return showNotification('Автокликер уже активен!');
     if (coins < 50) return showNotification('Недостаточно монет!');
     coins -= 50;
     autoclick = true;
-    autoclickTimeLeft = 60;
+    autoclickTimeLeft = 60; // сбрасываем таймер
     updateUI();
-    updateAutoclickTimerUI();
+    updateAutoclickTimerUI(); // обязательно обновляем таймер на экране
     showNotification('Автокликер активирован на 60 секунд!');
     document.getElementById('autoclick-btn').disabled = true;
+
+    // Если уже был автокликер — сбрасываем старый интервал
+    if (window._autoclickerInterval) clearInterval(window._autoclickerInterval);
 
     // Запуск автокликера
     window._autoclickerInterval = setInterval(() => {
@@ -512,18 +544,18 @@ document.getElementById('autoclick-btn').onclick = autoSaveWrap(function() {
         saveGame();
     }, 1000);
 
-    // Запуск таймера отображения
-    autoclickTimerInterval = setInterval(() => {
+    // Запуск таймера автокликера
+    if (window._autoclickerTimer) clearInterval(window._autoclickerTimer);
+    window._autoclickerTimer = setInterval(() => {
         autoclickTimeLeft--;
         updateAutoclickTimerUI();
         if (autoclickTimeLeft <= 0) {
             clearInterval(window._autoclickerInterval);
-            clearInterval(autoclickTimerInterval);
+            clearInterval(window._autoclickerTimer);
             autoclick = false;
             document.getElementById('autoclick-btn').disabled = false;
             updateAutoclickTimerUI();
-            showNotification('Автокликер отключён!');
-            saveGame();
+            showNotification('Автокликер закончился!');
         }
     }, 1000);
 });
@@ -598,18 +630,81 @@ loadGame();
 giveDailyBonus();
 
 if (window.Telegram && Telegram.WebApp) {
-    Telegram.WebApp.BackButton.show();
-    Telegram.WebApp.BackButton.onClick(() => Telegram.WebApp.close());
+    Telegram.WebApp.ready();
+    Telegram.WebApp.expand(); // Открыть WebApp на весь экран
 }
 
 // Сначала объявите функцию
 function updatePetsCollection() {
-    // ...ваш код для обновления коллекции питомцев...
+    document.getElementById('coll-dog').style.opacity = ownedPets.dog ? '1' : '0.3';
+    document.getElementById('coll-bird').style.opacity = ownedPets.bird ? '1' : '0.3';
+    document.getElementById('coll-cat').style.opacity = ownedPets.cat ? '1' : '0.3';
+    document.getElementById('coll-unicorn').style.opacity = ownedPets.unicorn ? '1' : '0.3';
+
+    // Награда за полную коллекцию
+    const rewardDiv = document.getElementById('collection-reward');
+    if (ownedPets.dog && ownedPets.bird && ownedPets.cat) {
+        rewardDiv.textContent = 'Коллекция собрана! Бонус: +2 к пассивному доходу';
+        if (!window._collectionRewardGiven) {
+            passiveIncome += 2;
+            updatePassiveUI();
+            window._collectionRewardGiven = true;
+            showNotification('Бонус за коллекцию: +2 к пассивному доходу!');
+            saveGame();
+        }
+    } else {
+        rewardDiv.textContent = '';
+        window._collectionRewardGiven = false;
+    }
 }
 
-// Потом объявляйте/вызывайте loadGame и другие функции, которые используют updatePetsCollection
-function loadGame() {
-    // ...ваш код...
+// Навигация по вкладкам
+document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.onclick = function() {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.getAttribute('data-tab');
+        document.querySelectorAll('.tab').forEach(t => t.style.display = 'none');
+        document.getElementById('tab-' + tab).style.display = 'block';
+    }
+});
+// По умолчанию показываем первую вкладку
+document.querySelector('.nav-btn[data-tab="game"]').classList.add('active');
+document.getElementById('tab-game').style.display = 'block';
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function(event) {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
+
+document.addEventListener('gesturestart', function (e) {
+    e.preventDefault();
+});
+
+// Покупка/выбор единорога
+document.getElementById('pet-unicorn').onclick = autoSaveWrap(function() {
+    if (!ownedPets.unicorn) return showNotification('Сначала получите единорога!');
+    currentPet = 'unicorn';
+    updatePetInfo();
+    updatePetImage();
+    updatePassiveUI();
+    updateUI();
     updatePetsCollection();
-    // ...ваш код...
+    showNotification('Единорог выбран! +5 к пассивному доходу');
+});
+
+function fullUpdateUI() {
+    updateUI();
+    updatePetInfo && updatePetInfo();
+    updatePetImage && updatePetImage();
+    updatePassiveUI && updatePassiveUI();
+    updateCatSkin && updateCatSkin();
+    renderPets && renderPets();
+    renderSkins && renderSkins();
+    renderShop && renderShop();
+    renderAchievements && renderAchievements();
 }

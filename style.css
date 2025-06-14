@@ -32,22 +32,26 @@ body::after {
     filter: blur(40px); opacity: 0.6;
 }
 #main {
-    max-width: 350px;
-    margin: 40px auto;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 4px 24px #0001;
-    padding: 24px;
-    text-align: center;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 18px 10px calc(90px + env(safe-area-inset-bottom, 0));
+    background: rgba(255,255,255,0.95);
     min-height: 100vh;
-    min-width: 100vw;
-    box-sizing: border-box;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 8px 32px #ffecb3a0;
 }
 #cat-area {
     position: relative;
-    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 24px 0 14px 0;
+    min-height: 160px;
 }
-#cat-img { width: 180px; height: 180px; cursor: pointer; transition: transform 0.1s; }
+#cat-img {
+    width: 130px;
+    height: 130px;
+}
 #cat-img:active { transform: scale(1.08); }
 #cat-img.clicked {
     animation: pop 0.2s;
@@ -79,7 +83,14 @@ body::after {
     background: linear-gradient(90deg, #ffe082 0%, #ffd54f 100%);
     transform: scale(0.97);
 }
-#coins { font-size: 1.2em; margin: 12px 0; }
+#coins {
+    text-align: center;
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #ffb300;
+    margin-bottom: 6px;
+    text-shadow: 0 2px 8px #fff8;
+}
 #notification { margin-top: 16px; color: #388e3c; font-weight: bold; min-height: 24px; }
 #shop { margin-top: 24px; }
 .coin-float {
@@ -88,7 +99,7 @@ body::after {
     color: #ffb300;
     font-weight: bold;
     text-shadow: 0 2px 8px #fff8;
-    animation: coin-float 0.9s cubic-bezier(.4,1.6,.6,1);
+    animation: coin-float 0.7s cubic-bezier(.4,1.6,.6,1);
     pointer-events: none;
 }
 @keyframes coin-float {
@@ -103,13 +114,35 @@ body::after {
     list-style: none;
     padding: 0;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
 }
 #achievements-list li {
-    background: #e0f7fa;
-    margin: 4px 0;
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-size: 0.98em;
+    background: linear-gradient(90deg, #fffbe9 0%, #ffe082 100%);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #ffecb366;
+    padding: 14px 18px;
+    font-size: 1.08em;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background 0.2s;
+    position: relative;
+}
+#achievements-list li.unlocked {
+    border-left: 6px solid #ffb300;
+    background: linear-gradient(90deg, #ffe082 0%, #ffd54f 100%);
+    font-weight: bold;
+}
+#achievements-list li.locked {
+    opacity: 0.5;
+    filter: grayscale(0.7);
+}
+.achievement-icon {
+    font-size: 1.5em;
+    margin-right: 8px;
 }
 #reset-btn {
     background: #e57373 !important;
@@ -146,14 +179,14 @@ body::after {
 }
 .nav-btn {
     flex: 1;
-    padding: 12px 0;
     font-size: 1.1em;
     background: none;
     border: none;
     color: #ffb300;
     font-weight: bold;
     cursor: pointer;
-    transition: background 0.2s;
+    border-radius: 0;
+    transition: background 0.2s, color 0.2s;
 }
 .nav-btn.active, .nav-btn:active {
     background: #fff3e0;
@@ -198,4 +231,137 @@ button, .ui-btn, .nav-btn, #cat-img {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+.skins-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    gap: 18px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.skins-list li {
+    background: linear-gradient(135deg, #fffbe9 0%, #ffe082 100%);
+    border-radius: 14px;
+    box-shadow: 0 2px 8px #ffecb366;
+    padding: 16px 10px 10px 10px;
+    font-size: 1em;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 90px;
+    min-height: 120px;
+    position: relative;
+    transition: box-shadow 0.2s, border 0.2s;
+    border: 3px solid transparent;
+}
+.skins-list li.selected {
+    border: 3px solid #ffb300;
+    box-shadow: 0 4px 16px #ffd54f88;
+}
+.skins-list li.locked {
+    opacity: 0.5;
+    filter: grayscale(0.7);
+}
+.skin-img {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 8px;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px #ffd54f44;
+    background: #fff;
+    object-fit: cover;
+}
+.skin-btn {
+    margin-top: 6px;
+    background: linear-gradient(90deg, #ffd54f 0%, #ffb300 100%);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 0.98em;
+    color: #333;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+.skin-btn:active {
+    background: linear-gradient(90deg, #ffe082 0%, #ffd54f 100%);
+    transform: scale(0.97);
+}
+.pets-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 18px 0;
+    display: flex;
+    flex-direction: row;
+    gap: 18px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.pets-list li {
+    background: linear-gradient(135deg, #fffbe9 0%, #ffe082 100%);
+    border-radius: 14px;
+    box-shadow: 0 2px 8px #ffecb366;
+    padding: 16px 10px 10px 10px;
+    font-size: 1em;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 90px;
+    min-height: 120px;
+    position: relative;
+    transition: box-shadow 0.2s, border 0.2s;
+    border: 3px solid transparent;
+}
+.pets-list li.selected {
+    border: 3px solid #388e3c;
+    box-shadow: 0 4px 16px #a5d6a7;
+}
+.pets-list li.locked {
+    opacity: 0.5;
+    filter: grayscale(0.7);
+}
+.pet-img {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 8px;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px #ffd54f44;
+    background: #fff;
+    object-fit: cover;
+}
+.pet-btn {
+    margin-top: 6px;
+    background: linear-gradient(90deg, #ffd54f 0%, #ffb300 100%);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 0.98em;
+    color: #333;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+.pet-btn:active {
+    background: linear-gradient(90deg, #ffe082 0%, #ffd54f 100%);
+    transform: scale(0.97);
+}
+.current-pet-info {
+    text-align: center;
+    font-size: 1.1em;
+    color: #388e3c;
+    margin-top: 8px;
+    min-height: 24px;
+}
+h1 {
+    text-align: center;
+    font-size: 2.2em;
+    margin-bottom: 18px;
+    letter-spacing: 2px;
+    color: #ff9800;
+    text-shadow: 0 2px 8px #fff8;
 }
