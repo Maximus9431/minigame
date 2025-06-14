@@ -640,3 +640,7 @@ document.addEventListener('touchend', function(event) {
     }
     lastTouchEnd = now;
 }, false);
+
+document.addEventListener('gesturestart', function (e) {
+    e.preventDefault();
+});
