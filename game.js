@@ -599,34 +599,71 @@ giveDailyBonus();
 
 if (window.Telegram && Telegram.WebApp) {
     Telegram.WebApp.ready();
-
-    // BackButton
-    Telegram.WebApp.BackButton.show();
-    Telegram.WebApp.BackButton.onClick(function() {
-        Telegram.WebApp.close();
-    });
-
-    // MainButton (нижняя большая кнопка)
     Telegram.WebApp.MainButton.setText("Отправить результат");
     Telegram.WebApp.MainButton.show();
     Telegram.WebApp.MainButton.onClick(function() {
-        // Пример: отправить результат в Telegram
-        Telegram.WebApp.sendData(JSON.stringify({
-            coins: coins,
-            level: level,
-            clickPower: clickPower
-        }));
+        Telegram.WebApp.sendData("Привет из мини-игры!");
     });
+}
 
-    // SecondaryButton (второстепенная нижняя кнопка)
-    if (Telegram.WebApp.isVersionAtLeast("6.9")) { // SecondaryButton доступна с 6.9
-        Telegram.WebApp.SecondaryButton.setText("Сбросить прогресс");
-        Telegram.WebApp.SecondaryButton.show();
-        Telegram.WebApp.SecondaryButton.onClick(function() {
-            if (confirm("Вы уверены, что хотите сбросить прогресс?")) {
-                localStorage.clear();
-                location.reload();
-            }
-        });
+function updatePetsCollection() {
+    document.getElementById('coll-dog').style.opacity = ownedPets.dog ? '1' : '0.3';
+    document.getElementById('coll-bird').style.opacity = ownedPets.bird ? '1' : '0.3';
+    document.getElementById('coll-cat').style.opacity = ownedPets.cat ? '1' : '0.3';
+    document.getElementById('coll-unicorn').style.opacity = ownedPets.unicorn ? '1' : '0.3';
+
+    // Награда за полную коллекцию
+    const rewardDiv = document.getElementById('collection-reward');
+    if (ownedPets.dog && ownedPets.bird && ownedPets.cat) {
+        rewardDiv.textContent = 'Коллекция собрана! Бонус: +2 к пассивному доходу';
+        if (!window._collectionRewardGiven) {
+            passiveIncome += 2;
+            updatePassiveUI();
+            window._collectionRewardGiven = true;
+            showNotification('Бонус за коллекцию: +2 к пассивному доходу!');
+            saveGame();
+        }
+    } else {
+        rewardDiv.textContent = '';
+        window._collectionRewardGiven = false;
     }
 }
+
+// Навигация по вкладкам
+document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.onclick = function() {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.getAttribute('data-tab');
+        document.querySelectorAll('.tab').forEach(t => t.style.display = 'none');
+        document.getElementById('tab-' + tab).style.display = 'block';
+    }
+});
+// По умолчанию показываем первую вкладку
+document.querySelector('.nav-btn[data-tab="game"]').classList.add('active');
+document.getElementById('tab-game').style.display = 'block';
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function(event) {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+        event.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
+
+document.addEventListener('gesturestart', function (e) {
+    e.preventDefault();
+});
+
+// Покупка/выбор единорога
+document.getElementById('pet-unicorn').onclick = autoSaveWrap(function() {
+    if (!ownedPets.unicorn) return showNotification('Сначала получите единорога!');
+    currentPet = 'unicorn';
+    updatePetInfo();
+    updatePetImage();
+    updatePassiveUI();
+    updateUI();
+    updatePetsCollection();
+    showNotification('Единорог выбран! +5 к пассивному доходу');
+});
