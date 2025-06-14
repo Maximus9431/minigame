@@ -1,4 +1,4 @@
-body { margin: 0; font-family: Arial, sans-serif; background: #f9f6ee; }
+body { margin: 0; font-family: Arial, sans-serif; background: #f9f6ee; padding-bottom: 60px; }
 #main { max-width: 350px; margin: 40px auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 24px #0001; padding: 24px; text-align: center; }
 #cat-area {
     position: relative;
@@ -72,3 +72,30 @@ body { margin: 0; font-family: Arial, sans-serif; background: #f9f6ee; }
     height: 12px;
     transition: width 0.5s;
 }
+#main-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    background: #fff;
+    border-top: 1px solid #eee;
+    display: flex;
+    z-index: 100;
+}
+.nav-btn {
+    flex: 1;
+    padding: 12px 0;
+    font-size: 1.1em;
+    background: none;
+    border: none;
+    color: #ffb300;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.nav-btn.active, .nav-btn:active {
+    background: #fff3e0;
+    color: #ff9800;
+}
+.tab { display: none; }
+.tab.active { display: block; }

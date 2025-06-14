@@ -9,39 +9,92 @@
 <body>
     <div id="main">
         <h1>Котокликер 🐾</h1>
-        <div id="cat-area">
-            <img id="cat-img" src="cat1.png" alt="Котик" />
+
+        <!-- Вкладка Игра -->
+        <div class="tab" id="tab-game">
+            <div id="cat-area">
+                <img id="cat-img" src="cat1.png" alt="Котик" />
+                <img id="pet-img" src="" alt="" style="width:60px;height:60px;display:none;position:absolute;left:10px;bottom:10px;">
+            </div>
+            <div id="coins">Монеты: <span id="coin-count">0</span></div>
+            <div id="level-area">
+                <span>Уровень: <span id="level">1</span></span>
+                <div id="xp-bar" style="background:#eee;width:100px;height:10px;display:inline-block;vertical-align:middle;">
+                    <div id="xp-progress" style="background:#aaf;width:0;height:10px;"></div>
+                </div>
+            </div>
+            <div id="autoclick-timer" style="color:#888; font-size:0.98em; min-height:18px;"></div>
+            <button id="upgrade-btn" class="ui-btn">Улучшить клик (10💰)</button>
+            <button id="autoclick-btn" class="ui-btn">Автокликер (50💰)</button>
+            <button id="booster-btn" class="ui-btn">Бустер: x2 монеты (20💰, 30 сек)</button>
+            <div id="notification"></div>
         </div>
-        <div id="coins">Монеты: <span id="coin-count">0</span></div>
-        <div id="level-area">
-            <span>Уровень: <span id="level">1</span></span>
-            <div id="xp-bar" style="background:#eee;width:100px;height:10px;display:inline-block;vertical-align:middle;">
-                <div id="xp-progress" style="background:#aaf;width:0;height:10px;"></div>
+
+        <!-- Вкладка Магазин -->
+        <div class="tab" id="tab-shop" style="display:none;">
+            <button id="passive-btn" class="ui-btn">Улучшить пассивный доход (25💰)</button>
+            <div id="passive-info" style="margin:8px 0; color:#888; font-size:0.98em;">
+                Пассивный доход: <span id="passive-value">0</span> монет/сек
+            </div>
+            <div id="shop">
+                <h3>Магазин котиков</h3>
+                <button id="buy-cat2" class="ui-btn">Котик №2 (100💰)</button>
+                <button id="buy-cat3" class="ui-btn">Котик №3 (донат)</button>
+            </div>
+            <button id="reset-btn" class="ui-btn" style="background:#e57373;margin-top:16px;">Сбросить прогресс</button>
+            <div id="daily-bonus-area" style="margin:18px 0;">
+                <div style="font-size:1em;">Ежедневный бонус:</div>
+                <div id="daily-bonus-bar" style="background:#eee;width:100%;height:12px;border-radius:6px;overflow:hidden;">
+                    <div id="daily-bonus-progress" style="background:#ffd54f;width:0;height:12px;transition:width 0.5s;"></div>
+                </div>
+                <div id="daily-bonus-timer" style="font-size:0.95em;color:#888;margin-top:2px;"></div>
             </div>
         </div>
-        <button id="upgrade-btn" class="ui-btn">Улучшить клик (10💰)</button>
-        <button id="autoclick-btn" class="ui-btn">Автокликер (50💰)</button>
-        <button id="booster-btn" class="ui-btn">Бустер: x2 монеты (20💰, 30 сек)</button>
-        <button id="passive-btn" class="ui-btn">Улучшить пассивный доход (25💰)</button>
-        <div id="passive-info" style="margin:8px 0; color:#888; font-size:0.98em;">Пассивный доход: <span id="passive-value">0</span> монет/сек</div>
-        <div id="shop">
-            <h3>Магазин котиков</h3>
-            <button id="buy-cat2" class="ui-btn">Котик №2 (100💰)</button>
-            <button id="buy-cat3" class="ui-btn">Котик №3 (донат)</button>
+
+        <!-- Вкладка Питомцы -->
+        <div class="tab" id="tab-pets" style="display:none;">
+            <h3>Питомцы</h3>
+            <button id="pet-dog" class="ui-btn">Собачка (+1 пассивный доход, 500💰)</button>
+            <button id="pet-bird" class="ui-btn">Птичка (+10% к клику, 800💰)</button>
+            <button id="pet-cat" class="ui-btn">Котёнок (+5% к пассивному доходу, 1200💰)</button>
+            <button id="pet-none" class="ui-btn">Без питомца</button>
+            <div id="pet-info" style="color:#888; font-size:0.98em; margin-top:6px;">
+                Текущий питомец: <span id="current-pet">нет</span>
+            </div>
+            <div id="pets-collection" style="margin-top:18px;">
+                <h3>Коллекция питомцев</h3>
+                <div id="collection-list" style="display:flex;gap:10px;">
+                    <img src="pet_dog.png" alt="Собачка" id="coll-dog" style="width:40px;opacity:0.3;">
+                    <img src="pet_bird.png" alt="Птичка" id="coll-bird" style="width:40px;opacity:0.3;">
+                    <img src="pet_cat.png" alt="Котёнок" id="coll-cat" style="width:40px;opacity:0.3;">
+                    <img src="pet_unicorn.png" alt="Единорог" id="coll-unicorn" style="width:40px;opacity:0.3;">
+                </div>
+                <div id="collection-reward" style="color:#388e3c;font-weight:bold;margin-top:8px;"></div>
+            </div>
         </div>
-        <div id="notification"></div>
-        <div id="achievements">
+
+        <!-- Вкладка Скины -->
+        <div class="tab" id="tab-skins" style="display:none;">
+            <h3>Скины котика</h3>
+            <button id="skin-default" class="ui-btn">Обычный (бесплатно)</button>
+            <button id="skin-gold" class="ui-btn">Золотой котик (открыть за 1000 монет)</button>
+            <button id="skin-achieve" class="ui-btn">Достижение: 100 кликов</button>
+        </div>
+
+        <!-- Вкладка Достижения -->
+        <div class="tab" id="tab-achievements" style="display:none;">
             <h3>Достижения</h3>
             <ul id="achievements-list"></ul>
         </div>
-        <button id="reset-btn" class="ui-btn" style="background:#e57373;margin-top:16px;">Сбросить прогресс</button>
-        <div id="daily-bonus-area" style="margin:18px 0;">
-            <div style="font-size:1em;">Ежедневный бонус:</div>
-            <div id="daily-bonus-bar" style="background:#eee;width:100%;height:12px;border-radius:6px;overflow:hidden;">
-                <div id="daily-bonus-progress" style="background:#ffd54f;width:0;height:12px;transition:width 0.5s;"></div>
-            </div>
-            <div id="daily-bonus-timer" style="font-size:0.95em;color:#888;margin-top:2px;"></div>
-        </div>
+
+        <!-- Меню вкладок -->
+        <nav id="main-nav">
+            <button class="nav-btn" data-tab="game">Игра</button>
+            <button class="nav-btn" data-tab="shop">Магазин</button>
+            <button class="nav-btn" data-tab="pets">Питомцы</button>
+            <button class="nav-btn" data-tab="skins">Скины</button>
+            <button class="nav-btn" data-tab="achievements">Достижения</button>
+        </nav>
     </div>
     <script src="game.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
