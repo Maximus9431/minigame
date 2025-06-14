@@ -99,3 +99,21 @@ body { margin: 0; font-family: Arial, sans-serif; background: #f9f6ee; padding-b
 }
 .tab { display: none; }
 .tab.active { display: block; }
+/* Адаптация нижнего меню для мобильных устройств */
+@media (max-width: 600px) {
+    #main-nav {
+        font-size: 0.95em;
+    }
+    .nav-btn {
+        padding: 8px 0;
+        font-size: 0.95em;
+        min-width: 0;
+        word-break: break-word;
+    }
+}
+@media (max-width: 400px) {
+    .nav-btn {
+        font-size: 0.85em;
+        padding: 6px 0;
+    }
+}
