@@ -125,7 +125,13 @@ function updateBoosterTimerUI() {
 
 // Клик по котику
 const catImg = document.getElementById('cat-img');
+
 catImg.addEventListener('click', autoSaveWrap(function(e) {
+    if (meowEnabled && meowSound) {
+        meowSound.currentTime = 0; // чтобы звук проигрывался заново при быстром клике
+        meowSound.play();
+    }
+
     let reward = clickPower;
     if (boosterActive) reward *= 2;
     if (currentPet === 'bird') reward = Math.floor(reward * 1.1);
@@ -735,3 +741,32 @@ function fullUpdateUI() {
     renderShop && renderShop();
     renderAchievements && renderAchievements();
 }
+
+// Звук мяуканья
+const meowSound = document.getElementById('meow-sound');
+let meowEnabled = true;
+
+// Открытие настроек
+document.getElementById('settings-btn').onclick = function() {
+    document.getElementById('settings-modal').style.display = 'flex';
+    document.getElementById('meow-toggle').checked = meowEnabled;
+};
+
+// Закрытие настроек
+document.getElementById('close-settings').onclick = function() {
+    document.getElementById('settings-modal').style.display = 'none';
+};
+
+// Переключатель звука
+document.getElementById('meow-toggle').onchange = function() {
+    meowEnabled = this.checked;
+};
+
+// Воспроизведение звука только если включено
+document.getElementById('cat-img').addEventListener('click', function() {
+    if (meowEnabled && meowSound) {
+        meowSound.currentTime = 0;
+        meowSound.play();
+    }
+    // ...остальной код клика...
+});

@@ -9,7 +9,10 @@
 </head>
 <body>
     <div id="main">
-        <h1>CatClicker 🐾</h1>
+        <h1>
+          CatClicker
+          <span id="settings-btn" style="cursor:pointer; margin-left:8px; font-size:0.9em;" title="Настройки">🐾</span>
+        </h1>
 
         <!-- Вкладка Игра -->
         <div class="tab" id="tab-game">
@@ -98,7 +101,21 @@
             <button class="nav-btn" data-tab="skins">Skins</button>
             <button class="nav-btn" data-tab="achievements">Achievements</button>
         </nav>
+
+        <!-- Модальное окно настроек -->
+        <div id="settings-modal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); z-index:999; align-items:center; justify-content:center;">
+          <div style="background:#fff; border-radius:16px; padding:24px 20px; min-width:220px; box-shadow:0 4px 24px #0002; position:relative;">
+            <button id="close-settings" style="position:absolute; right:12px; top:10px; background:none; border:none; font-size:1.3em; cursor:pointer;">✖️</button>
+            <h3 style="margin-top:0;">Настройки</h3>
+            <label class="switch-label">
+              <input type="checkbox" id="meow-toggle" checked>
+              <span class="switch-slider"></span>
+              Звук мяуканья
+            </label>
+          </div>
+        </div>
     </div>
+    <audio id="meow-sound" src="meow.mp3" preload="auto"></audio>
     <script src="game.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </body>
