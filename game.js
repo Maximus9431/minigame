@@ -151,9 +151,14 @@ catImg.addEventListener('click', function(e) {
         catImg.style.transform = '';
     }, 120);
 
+    // Воспроизвести мяуканье, если включено
     if (meowEnabled && meowSound) {
-        meowSound.currentTime = 0; // чтобы звук проигрывался заново при быстром клике
+        meowSound.currentTime = 0;
         meowSound.play();
+    }
+    // Вибрация (если поддерживается)
+    if (vibrationEnabled && window.navigator.vibrate) {
+        window.navigator.vibrate(50); // 50 мс вибрации
     }
 
     let reward = clickPower;
@@ -746,12 +751,22 @@ document.getElementById('meow-toggle').onchange = function() {
 
 // Воспроизведение звука только если включено
 document.getElementById('cat-img').addEventListener('click', function() {
+    // Воспроизвести мяуканье, если включено
     if (meowEnabled && meowSound) {
         meowSound.currentTime = 0;
         meowSound.play();
     }
+    // Вибрация (если поддерживается)
+    if (vibrationEnabled && window.navigator.vibrate) {
+        window.navigator.vibrate(50); // 50 мс вибрации
+    }
     // ...остальной код клика...
 });
+
+let vibrationEnabled = true;
+document.getElementById('vibration-toggle').onchange = function() {
+    vibrationEnabled = this.checked;
+};
 
 // Например, если у вас есть переменная upgradeLevel:
 function updateShopUI() {

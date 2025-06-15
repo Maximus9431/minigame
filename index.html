@@ -49,7 +49,6 @@
                 <button id="buy-cat2" class="ui-btn">Cat №2 (100🪙)</button>
                 <button id="buy-cat3" class="ui-btn">Cat №3 (donate)</button>
             </div>
-            <button id="reset-btn" class="ui-btn" style="background:#e57373;margin-top:16px;">Reset progress</button>
         </div>
 
         <!-- Вкладка Питомцы -->
@@ -100,14 +99,21 @@
 
         <!-- Модальное окно настроек -->
         <div id="settings-modal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); z-index:999; align-items:center; justify-content:center;">
-          <div style="background:#fff; border-radius:16px; padding:24px 20px; min-width:220px; box-shadow:0 4px 24px #0002; position:relative;">
-            <button id="close-settings" style="position:absolute; right:12px; top:10px; background:none; border:none; font-size:1.3em; cursor:pointer;">✖️</button>
+          <div class="settings-content">
+            <button id="close-settings" class="settings-close-btn">✖️</button>
             <h3 style="margin-top:0;">Настройки</h3>
             <label class="switch-label">
               <input type="checkbox" id="meow-toggle" checked>
               <span class="switch-slider"></span>
-              Звук мяуканья
+              Включить звук мяуканья
             </label>
+            <label class="switch-label">
+              <input type="checkbox" id="vibration-toggle" checked>
+              <span class="switch-slider"></span>
+              Включить вибрацию
+            </label>
+            <hr class="settings-divider">
+            <button id="reset-btn" class="ui-btn reset-btn">Сбросить прогресс</button>
           </div>
         </div>
     </div>
