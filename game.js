@@ -21,21 +21,21 @@ function updateShopUI() {
 }
 
 const achievements = [
-    { id: 'firstClick', text: 'Первый клик!', icon: '🐾', condition: (state) => state.totalClicks >= 1 },
-    { id: 'hundredClicks', text: '100 кликов!', icon: '💯', condition: (state) => state.totalClicks >= 100 },
-    { id: 'clickMaster', text: 'Клик-мастер: 500 кликов!', icon: '👆', condition: (state) => state.totalClicks >= 500 },
-    { id: 'clickGod', text: 'Клик-бог: 5000 кликов!', icon: '🖱️', condition: (state) => state.totalClicks >= 5000 },
-    { id: 'millionaire', text: 'Миллионер: 10 000 монет!', icon: '💰', condition: (state) => state.coins >= 10000 },
-    { id: 'petCollector', text: 'Питомец-коллекционер!', icon: '🐶', condition: (state) => Object.values(ownedPets).every(Boolean) },
-    { id: 'skinCollector', text: 'Скиноман!', icon: '🎨', condition: (state) => Object.values(ownedSkins).every(Boolean) },
-    { id: 'upgradeGuru', text: 'Апгрейд-гуру: 20 улучшений!', icon: '⬆️', condition: (state) => state.upgrades >= 20 },
-    { id: 'passiveKing', text: 'Пассивный доход: 10/сек!', icon: '⏳', condition: (state) => passiveIncome >= 10 },
-    { id: 'boosterFan', text: 'Бустер-любитель: 10 раз!', icon: '⚡', condition: (state) => state.boostersUsed >= 10 },
-    { id: 'autoclickerPro', text: 'Автокликер-профи: 10 раз!', icon: '🤖', condition: (state) => state.autoclickersUsed >= 10 },
-    { id: 'dailyStreak', text: 'Дневная серия: 7 дней!', icon: '📅', condition: (state) => state.dailyStreak >= 7 },
-    { id: 'unicornLuck', text: 'Счастливчик: пойман единорог!', icon: '🦄', condition: (state) => ownedPets.unicorn },
-    { id: 'collectionFull', text: 'Коллекция собрана!', icon: '🏆', condition: (state) => Object.values(ownedPets).every(Boolean) && Object.values(ownedSkins).every(Boolean) },
-    { id: 'legend', text: 'Легенда CatClicker: 20 уровень!', icon: '🌟', condition: (state) => level >= 20 }
+    { id: 'firstClick', text: 'First click!', icon: '🐾', condition: (state) => state.totalClicks >= 1 },
+    { id: 'hundredClicks', text: '100 clicks!', icon: '💯', condition: (state) => state.totalClicks >= 100 },
+    { id: 'clickMaster', text: 'Click Master: 500 clicks!', icon: '👆', condition: (state) => state.totalClicks >= 500 },
+    { id: 'clickGod', text: 'Click God: 5000 clicks!', icon: '🖱️', condition: (state) => state.totalClicks >= 5000 },
+    { id: 'millionaire', text: 'Millionaire: 10,000 coins!', icon: '💰', condition: (state) => state.coins >= 10000 },
+    { id: 'petCollector', text: 'Pet Collector!', icon: '🐶', condition: (state) => Object.values(ownedPets).every(Boolean) },
+    { id: 'skinCollector', text: 'Skin Collector!', icon: '🎨', condition: (state) => Object.values(ownedSkins).every(Boolean) },
+    { id: 'upgradeGuru', text: 'Upgrade Guru: 20 upgrades!', icon: '⬆️', condition: (state) => state.upgrades >= 20 },
+    { id: 'passiveKing', text: 'Passive King: 10/sec!', icon: '⏳', condition: (state) => passiveIncome >= 10 },
+    { id: 'boosterFan', text: 'Booster Fan: 10 times!', icon: '⚡', condition: (state) => state.boostersUsed >= 10 },
+    { id: 'autoclickerPro', text: 'Autoclicker Pro: 10 times!', icon: '🤖', condition: (state) => state.autoclickersUsed >= 10 },
+    { id: 'dailyStreak', text: 'Daily Streak: 7 days!', icon: '📅', condition: (state) => state.dailyStreak >= 7 },
+    { id: 'unicornLuck', text: 'Lucky: caught the unicorn!', icon: '🦄', condition: (state) => ownedPets.unicorn },
+    { id: 'collectionFull', text: 'Collection Complete!', icon: '🏆', condition: (state) => Object.values(ownedPets).every(Boolean) && Object.values(ownedSkins).every(Boolean) },
+    { id: 'legend', text: 'CatClicker Legend: Level 20!', icon: '🌟', condition: (state) => level >= 20 }
 ];
 let unlockedAchievements = [];
 
@@ -77,7 +77,7 @@ function checkAchievements(state) {
 
 function showAchievement(text) {
     const notif = document.getElementById('notification');
-    notif.textContent = 'Достижение: ' + text;
+    notif.textContent = 'Achievement: ' + text;
     setTimeout(() => { notif.textContent = ''; }, 2500);
 }
 
@@ -114,9 +114,9 @@ function setBoosterActive(active) {
     boosterActive = active;
     document.getElementById('booster-btn').disabled = active;
     if (active) {
-        showNotification('Бустер активирован! x2 монеты на 30 сек');
+        showNotification('Booster activated! x2 money for 30 sec');
     } else {
-        showNotification('Бустер закончился');
+        showNotification('Booster ended');
     }
 }
 
@@ -183,7 +183,7 @@ catImg.addEventListener('click', function(e) {
     if (!ownedPets.unicorn && Math.random() < 1/10) { // 1 к 10 — можно изменить шанс
         ownedPets.unicorn = true;
         updatePetsCollection();
-        showNotification('Поздравляем! Вам выпал редкий питомец: Единорог 🦄');
+        showNotification('Congratulations! You got a rare pet: Unicorn 🦄');
     }
 
     state.totalClicks++;
@@ -194,13 +194,13 @@ catImg.addEventListener('click', function(e) {
 // Улучшение клика
 document.getElementById('upgrade-btn').onclick = function() {
     const price = getUpgradePrice();
-    if (coins < price) return showNotification('Недостаточно монет!');
+    if (coins < price) return showNotification('Not enough money!');
     coins -= price;
     clickPower++;
     upgradeLevel++;
     updateShopUI();
     updateUI();
-    showNotification('Клик улучшен!');
+    showNotification('Click upgraded!');
 };
 
 function updateUpgradeButton() {
@@ -222,13 +222,13 @@ function updateAutoclickTimerUI() {
 
 // Автокликер на время
 document.getElementById('autoclick-btn').onclick = autoSaveWrap(function() {
-    if (coins < 50) return showNotification('Недостаточно монет!');
+    if (coins < 50) return showNotification('Not enough money!');
     coins -= 50;
     autoclick = true;
     autoclickTimeLeft = 60; // сбрасываем таймер
     updateUI();
     updateAutoclickTimerUI(); // обязательно обновляем таймер на экране
-    showNotification('Автокликер активирован на 60 секунд!');
+    showNotification('Autoclicker activated for 60 seconds!');
     document.getElementById('autoclick-btn').disabled = true;
 
     // Если уже был автокликер — сбрасываем старый интервал
@@ -252,36 +252,36 @@ document.getElementById('autoclick-btn').onclick = autoSaveWrap(function() {
             autoclick = false;
             document.getElementById('autoclick-btn').disabled = false;
             updateAutoclickTimerUI();
-            showNotification('Автокликер закончился!');
+            showNotification('Autoclicker ended!');
         }
     }, 1000);
 });
 
 // Магазин котиков
 document.getElementById('buy-cat2').onclick = autoSaveWrap(function() {
-    if (currentCat >= 2) return showNotification('Уже куплено!');
-    if (coins < 100) return showNotification('Недостаточно монет!');
+    if (currentCat >= 2) return showNotification('Already purchased!');
+    if (coins < 100) return showNotification('Not enough money!');
     coins -= 100;
     currentCat = 2;
     document.getElementById('cat-img').src = 'cat2.png';
     updateUI();
-    showNotification('Открыт новый котик!');
+    showNotification('A new cat unlocked!');
 });
 
 // Донатный котик (заглушка)
 document.getElementById('buy-cat3').onclick = autoSaveWrap(function() {
-    showNotification('Доступно только за донат!');
+    showNotification('Available for donation only!');
 });
 
 // Бустер
 document.getElementById('booster-btn').onclick = autoSaveWrap(function() {
-    if (coins < 100) return showNotification('Недостаточно монет!');
+    if (coins < 100) return showNotification('Not enough money!');
     coins -= 100;
     boosterActive = true;
     boosterTimeLeft = 30; // или сколько нужно секунд
     updateUI();
     updateBoosterTimerUI();
-    showNotification('Бустер x2 активирован на 30 секунд!');
+    showNotification('Booster x2 activated for 30 seconds!');
     document.getElementById('booster-btn').disabled = true;
 
     // Сбросить старый интервал, если был
@@ -295,7 +295,7 @@ document.getElementById('booster-btn').onclick = autoSaveWrap(function() {
             boosterActive = false;
             document.getElementById('booster-btn').disabled = false;
             updateBoosterTimerUI();
-            showNotification('Бустер закончился!');
+            showNotification('Booster ended!');
         }
     }, 1000);
 });
@@ -316,31 +316,31 @@ document.getElementById('skin-gold').onclick = autoSaveWrap(function() {
     if (ownedSkins.gold) {
         currentSkin = 'gold';
         updateCatSkin();
-        showNotification('Золотой котик выбран!');
+        showNotification('Golden cat selected!');
         return;
     }
-    if (coins < 1000) return showNotification('Недостаточно монет!');
+    if (coins < 1000) return showNotification('Not enough money!');
     coins -= 1000;
     ownedSkins.gold = true;
     currentSkin = 'gold';
     updateUI();
     updateCatSkin();
-    showNotification('Золотой котик куплен и выбран!');
+    showNotification('Golden cat purchased and selected!');
 });
 
 // Обычный скин
 document.getElementById('skin-default').onclick = autoSaveWrap(function() {
     currentSkin = 'default';
     updateCatSkin();
-    showNotification('Обычный котик выбран!');
+    showNotification('Default cat selected!');
 });
 
 // Скин за достижение
 document.getElementById('skin-achieve').onclick = autoSaveWrap(function() {
-    if (!ownedSkins.achieve) return showNotification('Скин откроется после 100 кликов!');
+    if (!ownedSkins.achieve) return showNotification('The skin will unlock after 100 clicks!');
     currentSkin = 'achieve';
     updateCatSkin();
-    showNotification('Достижение-скин выбран!');
+    showNotification('Achievement skin selected!');
 });
 
 // Открытие скина за достижение
@@ -384,10 +384,10 @@ document.getElementById('pet-dog').onclick = autoSaveWrap(function() {
     if (ownedPets.dog) {
         currentPet = 'dog';
         updatePetInfo();
-        showNotification('Собачка выбрана!');
+        showNotification('Dog selected!');
         return;
     }
-    if (coins < 500) return showNotification('Недостаточно монет!');
+    if (coins < 500) return showNotification('Not enough money!');
     coins -= 500;
     ownedPets.dog = true;
     currentPet = 'dog';
@@ -396,7 +396,7 @@ document.getElementById('pet-dog').onclick = autoSaveWrap(function() {
     updatePassiveUI();
     updatePetInfo();
     updatePetImage();
-    showNotification('Собачка куплена и выбрана! +1 пассивный доход');
+    showNotification('Dog purchased and selected! +1 passive income');
 });
 
 // Покупка птички
@@ -404,17 +404,17 @@ document.getElementById('pet-bird').onclick = autoSaveWrap(function() {
     if (ownedPets.bird) {
         currentPet = 'bird';
         updatePetInfo();
-        showNotification('Птичка выбрана!');
+        showNotification('Bird selected!');
         return;
     }
-    if (coins < 800) return showNotification('Недостаточно монет!');
+    if (coins < 800) return showNotification('Not enough money!');
     coins -= 800;
     ownedPets.bird = true;
     currentPet = 'bird';
     updateUI();
     updatePetInfo();
     updatePetImage();
-    showNotification('Птичка куплена и выбрана! +10% к клику');
+    showNotification('Bird purchased and selected! +10% to click');
 });
 
 // Покупка котёнка
@@ -422,24 +422,24 @@ document.getElementById('pet-cat').onclick = autoSaveWrap(function() {
     if (ownedPets.cat) {
         currentPet = 'cat';
         updatePetInfo();
-        showNotification('Котёнок выбран!');
+        showNotification('Cat selected!');
         return;
     }
-    if (coins < 1200) return showNotification('Недостаточно монет!');
+    if (coins < 1200) return showNotification('Not enough money!');
     coins -= 1200;
     ownedPets.cat = true;
     currentPet = 'cat';
     updateUI();
     updatePetInfo();
     updatePetImage();
-    showNotification('Котёнок куплен и выбран! +5% к пассивному доходу');
+    showNotification('Cat purchased and selected! +5% to passive income');
 });
 
 // Снять питомца
 document.getElementById('pet-none').onclick = autoSaveWrap(function() {
     currentPet = null;
     updatePetInfo();
-    showNotification('Питомец снят!');
+    showNotification('The pet is cleaned up!');
 });
 
 // Модифицируйте начисление пассивного дохода:
@@ -459,7 +459,7 @@ setInterval(function() {
 if (!ownedPets.unicorn && Math.random() < 1/10) {
     ownedPets.unicorn = true;
     updatePetsCollection();
-    showNotification('Поздравляем! Вам выпал редкий питомец: Единорог 🦄');
+    showNotification('Congratulations! You got a rare pet: Unicorn 🦄');
 }
 
 // Функция сохранения состояния
@@ -533,23 +533,23 @@ function autoSaveWrap(fn) {
 
 document.getElementById('upgrade-btn').onclick = function() {
     const price = getUpgradePrice();
-    if (coins < price) return showNotification('Недостаточно монет!');
+    if (coins < price) return showNotification('Not enough money!');
     coins -= price;
     clickPower++;
     upgradeLevel++;
     updateShopUI();
     updateUI();
-    showNotification('Клик улучшен!');
+    showNotification('Click upgraded!');
 };
 
 document.getElementById('autoclick-btn').onclick = autoSaveWrap(function() {
-    if (coins < 50) return showNotification('Недостаточно монет!');
+    if (coins < 50) return showNotification('Not enough money!');
     coins -= 50;
     autoclick = true;
     autoclickTimeLeft = 60; // сбрасываем таймер
     updateUI();
     updateAutoclickTimerUI(); // обязательно обновляем таймер на экране
-    showNotification('Автокликер активирован на 60 секунд!');
+    showNotification('Autoclicker activated for 60 seconds!');
     document.getElementById('autoclick-btn').disabled = true;
 
     // Если уже был автокликер — сбрасываем старый интервал
@@ -573,27 +573,27 @@ document.getElementById('autoclick-btn').onclick = autoSaveWrap(function() {
             autoclick = false;
             document.getElementById('autoclick-btn').disabled = false;
             updateAutoclickTimerUI();
-            showNotification('Автокликер закончился!');
+            showNotification('Autoclicker ended!');
         }
     }, 1000);
 });
 
 document.getElementById('buy-cat2').onclick = autoSaveWrap(function() {
-    if (currentCat >= 2) return showNotification('Уже куплено!');
-    if (coins < 100) return showNotification('Недостаточно монет!');
+    if (currentCat >= 2) return showNotification('Already purchased!');
+    if (coins < 100) return showNotification('Not enough money!');
     coins -= 100;
     currentCat = 2;
     document.getElementById('cat-img').src = 'cat2.png';
     updateUI();
-    showNotification('Открыт новый котик!');
+    showNotification('A new cat unlocked!');
 });
 
 document.getElementById('buy-cat3').onclick = autoSaveWrap(function() {
-    showNotification('Доступно только за донат!');
+    showNotification('Available for donation only!');
 });
 
 document.getElementById('reset-btn').onclick = function() {
-    if (!confirm('Вы уверены, что хотите сбросить весь прогресс?')) return;
+    if (!confirm('Are you sure you want to reset all progress?')) return;
 
     // Сброс всех переменных
     coins = 0;
@@ -629,12 +629,12 @@ function updatePassiveUI() {
 
 // Улучшение пассивного дохода
 document.getElementById('passive-btn').onclick = autoSaveWrap(function() {
-    if (coins < 25) return showNotification('Недостаточно монет!');
+    if (coins < 25) return showNotification('Not enough money!');
     coins -= 25;
     passiveIncome++;
     updateUI();
     updatePassiveUI();
-    showNotification('Пассивный доход увеличен!');
+    showNotification('Passive income has increased!');
 });
 
 // Пассивное начисление монет каждую секунду
@@ -664,12 +664,12 @@ function updatePetsCollection() {
     // Награда за полную коллекцию
     const rewardDiv = document.getElementById('collection-reward');
     if (ownedPets.dog && ownedPets.bird && ownedPets.cat) {
-        rewardDiv.textContent = 'Коллекция собрана! Бонус: +2 к пассивному доходу';
+        rewardDiv.textContent = 'The collection is complete! Bonus: +2 to passive income.';
         if (!window._collectionRewardGiven) {
             passiveIncome += 2;
             updatePassiveUI();
             window._collectionRewardGiven = true;
-            showNotification('Бонус за коллекцию: +2 к пассивному доходу!');
+            showNotification('Bonus for collection: +2 to passive income!');
             saveGame();
         }
     } else {
@@ -707,14 +707,14 @@ document.addEventListener('gesturestart', function (e) {
 
 // Покупка/выбор единорога
 document.getElementById('pet-unicorn').onclick = autoSaveWrap(function() {
-    if (!ownedPets.unicorn) return showNotification('Сначала получите единорога!');
+    if (!ownedPets.unicorn) return showNotification('First, get the unicorn!');
     currentPet = 'unicorn';
     updatePetInfo();
     updatePetImage();
     updatePassiveUI();
     updateUI();
     updatePetsCollection();
-    showNotification('Единорог выбран! +5 к пассивному доходу');
+    showNotification('Unicorn selected! +5 to passive income');
 });
 
 function fullUpdateUI() {
