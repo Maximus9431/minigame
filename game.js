@@ -5,13 +5,19 @@ let currentCat = 1;
 let xp = 0;
 let level = 1;
 let passiveIncome = 0;
-let upgradeLevel = 1;
+let upgradeLevel = 1; // уровень клика
 const xpPerClick = 1;
 const xpToNextLevel = () => 10 + (level - 1) * 10;
 
 function getUpgradePrice() {
-    // Например, цена растёт в 1.5 раза за каждый уровень
-    return Math.floor(10 * Math.pow(2.2, upgradeLevel - 1));
+    return Math.floor(10 * Math.pow(1.5, upgradeLevel - 1));
+}
+
+function updateShopUI() {
+    document.getElementById('click-level').textContent = upgradeLevel;
+    // обновите цену на кнопке
+    document.getElementById('upgrade-btn').textContent = `Upgrade click (${getUpgradePrice()}🪙)`;
+    // ...обновите другие значения, если нужно...
 }
 
 const achievements = [
@@ -187,7 +193,7 @@ document.getElementById('upgrade-btn').onclick = function() {
     coins -= price;
     clickPower++;
     upgradeLevel++;
-    updateUpgradeButton();
+    updateShopUI();
     updateUI();
     showNotification('Клик улучшен!');
 };
@@ -526,7 +532,7 @@ document.getElementById('upgrade-btn').onclick = function() {
     coins -= price;
     clickPower++;
     upgradeLevel++;
-    updateUpgradeButton();
+    updateShopUI();
     updateUI();
     showNotification('Клик улучшен!');
 };
@@ -746,3 +752,11 @@ document.getElementById('cat-img').addEventListener('click', function() {
     }
     // ...остальной код клика...
 });
+
+// Например, если у вас есть переменная upgradeLevel:
+function updateShopUI() {
+    document.getElementById('click-level').textContent = upgradeLevel;
+    // обновите цену на кнопке
+    document.getElementById('upgrade-btn').textContent = `Upgrade click (${getUpgradePrice()}🪙)`;
+    // ...обновите другие значения, если нужно...
+}
