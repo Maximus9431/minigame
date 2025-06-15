@@ -511,42 +511,6 @@ function loadGame() {
     updatePetsCollection();
 }
 
-function updateDailyBonusBar() {
-    const now = Date.now();
-    const lastBonus = Number(localStorage.getItem('catclickerLastBonus') || 0);
-    const msInDay = 86400000;
-    const elapsed = now - lastBonus;
-    let percent = Math.min(100, (elapsed / msInDay) * 100);
-    document.getElementById('daily-bonus-progress').style.width = percent + '%';
-
-    let timerDiv = document.getElementById('daily-bonus-timer');
-    if (elapsed >= msInDay) {
-        timerDiv.textContent = 'Бонус доступен!';
-    } else {
-        const left = msInDay - elapsed;
-        const h = Math.floor(left / 3600000);
-        const m = Math.floor((left % 3600000) / 60000);
-        const s = Math.floor((left % 60000) / 1000);
-        timerDiv.textContent = `До бонуса: ${h}ч ${m}м ${s}с`;
-    }
-}
-
-function giveDailyBonus() {
-    const now = Date.now();
-    const lastBonus = Number(localStorage.getItem('catclickerLastBonus') || 0);
-    const msInDay = 86400000;
-    if (now - lastBonus > msInDay) {
-        const bonus = 50 + Math.floor(Math.random() * 51); // 50-100 монет
-        coins += bonus;
-        updateUI();
-        showNotification(`Ежедневный бонус: +${bonus} монет!`);
-        localStorage.setItem('catclickerLastBonus', now);
-        saveGame();
-    }
-    updateDailyBonusBar();
-    setInterval(updateDailyBonusBar, 1000);
-}
-
 // Сохранять игру при каждом действии
 function autoSaveWrap(fn) {
     return function(...args) {
@@ -673,7 +637,6 @@ setInterval(function() {
 
 // Загрузка игры при запуске
 loadGame();
-giveDailyBonus();
 
 if (window.Telegram && Telegram.WebApp) {
     Telegram.WebApp.ready();

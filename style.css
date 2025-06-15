@@ -2,6 +2,7 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
+    overflow: hidden; /* Запретить прокрутку */
 }
 body {
     min-height: 100vh;
@@ -33,9 +34,11 @@ body::after {
     padding: 24px 12px calc(110px + env(safe-area-inset-bottom, 0));
     background: rgba(255,255,255,0.92);
     min-height: 100vh;
+    height: 100vh;
     border-radius: 28px 28px 0 0;
     box-shadow: 0 12px 40px #cfaaff44, 0 2px 8px #ffecb3a0;
     position: relative;
+    overflow: auto; /* Если нужен внутренний скролл для контента, иначе уберите */
 }
 #cat-area {
     position: relative;
