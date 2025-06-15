@@ -5,14 +5,31 @@ let currentCat = 1;
 let xp = 0;
 let level = 1;
 let passiveIncome = 0;
+let upgradeLevel = 1;
 const xpPerClick = 1;
 const xpToNextLevel = () => 10 + (level - 1) * 10;
 
+function getUpgradePrice() {
+    // Например, цена растёт в 1.5 раза за каждый уровень
+    return Math.floor(10 * Math.pow(2.2, upgradeLevel - 1));
+}
+
 const achievements = [
-    { id: 'firstClick', text: 'Первый клик!', condition: (state) => state.totalClicks >= 1 },
-    { id: 'hundredClicks', text: '100 кликов!', condition: (state) => state.totalClicks >= 100 },
-    { id: 'firstUpgrade', text: 'Первое улучшение!', condition: (state) => state.upgrades >= 1 },
-    { id: 'richCat', text: '1000 монет!', condition: (state) => state.coins >= 1000 },
+    { id: 'firstClick', text: 'Первый клик!', icon: '🐾', condition: (state) => state.totalClicks >= 1 },
+    { id: 'hundredClicks', text: '100 кликов!', icon: '💯', condition: (state) => state.totalClicks >= 100 },
+    { id: 'clickMaster', text: 'Клик-мастер: 500 кликов!', icon: '👆', condition: (state) => state.totalClicks >= 500 },
+    { id: 'clickGod', text: 'Клик-бог: 5000 кликов!', icon: '🖱️', condition: (state) => state.totalClicks >= 5000 },
+    { id: 'millionaire', text: 'Миллионер: 10 000 монет!', icon: '💰', condition: (state) => state.coins >= 10000 },
+    { id: 'petCollector', text: 'Питомец-коллекционер!', icon: '🐶', condition: (state) => Object.values(ownedPets).every(Boolean) },
+    { id: 'skinCollector', text: 'Скиноман!', icon: '🎨', condition: (state) => Object.values(ownedSkins).every(Boolean) },
+    { id: 'upgradeGuru', text: 'Апгрейд-гуру: 20 улучшений!', icon: '⬆️', condition: (state) => state.upgrades >= 20 },
+    { id: 'passiveKing', text: 'Пассивный доход: 10/сек!', icon: '⏳', condition: (state) => passiveIncome >= 10 },
+    { id: 'boosterFan', text: 'Бустер-любитель: 10 раз!', icon: '⚡', condition: (state) => state.boostersUsed >= 10 },
+    { id: 'autoclickerPro', text: 'Автокликер-профи: 10 раз!', icon: '🤖', condition: (state) => state.autoclickersUsed >= 10 },
+    { id: 'dailyStreak', text: 'Дневная серия: 7 дней!', icon: '📅', condition: (state) => state.dailyStreak >= 7 },
+    { id: 'unicornLuck', text: 'Счастливчик: пойман единорог!', icon: '🦄', condition: (state) => ownedPets.unicorn },
+    { id: 'collectionFull', text: 'Коллекция собрана!', icon: '🏆', condition: (state) => Object.values(ownedPets).every(Boolean) && Object.values(ownedSkins).every(Boolean) },
+    { id: 'legend', text: 'Легенда CatClicker: 20 уровень!', icon: '🌟', condition: (state) => level >= 20 }
 ];
 let unlockedAchievements = [];
 
@@ -76,7 +93,10 @@ let state = {
     coins: 0,
     totalClicks: 0,
     upgrades: 0,
-    // ...другие параметры...
+    boostersUsed: 0,
+    autoclickersUsed: 0,
+    dailyStreak: 0
+    // ... другие поля, если есть
 };
 
 let boosterActive = false;
@@ -97,7 +117,7 @@ function setBoosterActive(active) {
 function updateBoosterTimerUI() {
     const el = document.getElementById('booster-timer');
     if (boosterTimeLeft > 0) {
-        el.textContent = `Осталось: ${boosterTimeLeft} сек.`;
+        el.textContent = `Booster: ${boosterTimeLeft} sec.`;
     } else {
         el.textContent = '';
     }
@@ -137,16 +157,20 @@ catImg.addEventListener('click', autoSaveWrap(function(e) {
 }));
 
 // Улучшение клика
-document.getElementById('upgrade-btn').onclick = autoSaveWrap(function() {
-    if (coins < 10) return showNotification('Недостаточно монет!');
-    coins -= 10;
+document.getElementById('upgrade-btn').onclick = function() {
+    const price = getUpgradePrice();
+    if (coins < price) return showNotification('Недостаточно монет!');
+    coins -= price;
     clickPower++;
+    upgradeLevel++;
+    updateUpgradeButton();
     updateUI();
-    showNotification('Клик улучшен! +' + clickPower + ' за клик');
+    showNotification('Клик улучшен!');
+};
 
-    state.upgrades++;
-    checkAchievements(state);
-});
+function updateUpgradeButton() {
+    document.getElementById('upgrade-btn').textContent = `Upgrade click (${getUpgradePrice()}🪙)`;
+}
 
 let autoclickTimer = null;
 let autoclickTimeLeft = 0;
@@ -513,16 +537,16 @@ function autoSaveWrap(fn) {
     }
 }
 
-document.getElementById('upgrade-btn').onclick = autoSaveWrap(function() {
-    if (coins < 10) return showNotification('Недостаточно монет!');
-    coins -= 10;
+document.getElementById('upgrade-btn').onclick = function() {
+    const price = getUpgradePrice();
+    if (coins < price) return showNotification('Недостаточно монет!');
+    coins -= price;
     clickPower++;
+    upgradeLevel++;
+    updateUpgradeButton();
     updateUI();
-    showNotification('Клик улучшен! +' + clickPower + ' за клик');
-
-    state.upgrades++;
-    checkAchievements(state);
-});
+    showNotification('Клик улучшен!');
+};
 
 document.getElementById('autoclick-btn').onclick = autoSaveWrap(function() {
     if (coins < 50) return showNotification('Недостаточно монет!');
@@ -590,6 +614,9 @@ document.getElementById('reset-btn').onclick = function() {
         coins: 0,
         totalClicks: 0,
         upgrades: 0,
+        boostersUsed: 0,
+        autoclickersUsed: 0,
+        dailyStreak: 0
     };
     boosterActive = false;
     ownedSkins = { default: true, gold: false, achieve: false };
