@@ -38,26 +38,28 @@ body::after {
     position: relative;
 }
 #cat-area {
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 30px 0 18px 0;
-    min-height: 180px;
+    min-height: 160px;
 }
 #cat-img {
-    width: 160px;
-    height: 160px;
-    object-fit: contain;
-    /* border-radius: 50%; */
-    /* border: none; */
-    box-shadow: 0 8px 32px #a259ff33, 0 2px 8px #ffecb344;
-    background: none;
-    transition: transform 0.12s cubic-bezier(.4,2,.6,1), box-shadow 0.2s;
-    cursor: pointer;
+    width: 130px;
+    height: 130px;
+    display: block;
+    position: relative;
+    z-index: 1;
 }
-#cat-img:active {
-    transform: scale(0.96) rotate(-2deg);
-    box-shadow: 0 2px 8px #a259ff22;
+#pet-img {
+    width: 60px;
+    height: 60px;
+    display: none; /* JS меняет на block */
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    z-index: 2;
+    pointer-events: none;
 }
 #coins {
     text-align: center;

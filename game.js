@@ -126,7 +126,25 @@ function updateBoosterTimerUI() {
 // Клик по котику
 const catImg = document.getElementById('cat-img');
 
-catImg.addEventListener('click', autoSaveWrap(function(e) {
+catImg.addEventListener('click', function(e) {
+    // Получаем координаты клика относительно картинки
+    const rect = catImg.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+
+    // Определяем сторону: левая или правая половина
+    if (x < rect.width / 2) {
+        // Левая сторона — наклон влево
+        catImg.style.transform = 'scale(0.96) rotate(-12deg)';
+    } else {
+        // Правая сторона — наклон вправо
+        catImg.style.transform = 'scale(0.96) rotate(12deg)';
+    }
+
+    // Возвращаем кота в исходное положение через 120 мс
+    setTimeout(() => {
+        catImg.style.transform = '';
+    }, 120);
+
     if (meowEnabled && meowSound) {
         meowSound.currentTime = 0; // чтобы звук проигрывался заново при быстром клике
         meowSound.play();
@@ -160,7 +178,7 @@ catImg.addEventListener('click', autoSaveWrap(function(e) {
     state.totalClicks++;
     checkAchievements(state);
     checkSkinsAchievements();
-}));
+});
 
 // Улучшение клика
 document.getElementById('upgrade-btn').onclick = function() {
@@ -329,30 +347,25 @@ function updatePetInfo() {
     if (currentPet === 'bird') name = 'Bird';
     if (currentPet === 'cat') name = 'Cat';
     if (currentPet === 'unicorn') name = 'Unicorn';
-    document.getElementById('current-pet').textContent = name;
+    document.getElementById('current-pet').textContent = currentPet;
 }
 
 function updatePetImage() {
     const petImg = document.getElementById('pet-img');
-    if (currentPet === 'dog') {
-        petImg.src = 'pet_dog.png';
-        petImg.alt = 'Dog';
-        petImg.style.display = '';
-    } else if (currentPet === 'bird') {
-        petImg.src = 'pet_bird.png';
-        petImg.alt = 'Bird';
-        petImg.style.display = '';
-    } else if (currentPet === 'cat') {
-        petImg.src = 'pet_cat.png';
-        petImg.alt = 'Cat';
-        petImg.style.display = '';
-    } else if (currentPet === 'unicorn') {
-        petImg.src = 'pet_unicorn.png';
-        petImg.alt = 'Unicorn';
-        petImg.style.display = '';
-    } else {
+    if (!currentPet || !ownedPets[currentPet] || currentPet === 'none') {
         petImg.style.display = 'none';
+        return;
     }
+    // Карта соответствия id питомца и картинки
+    const petImages = {
+        dog: 'pet_dog.png',
+        bird: 'pet_bird.png',
+        cat: 'pet_cat.png',
+        unicorn: 'pet_unicorn.png'
+    };
+    petImg.src = petImages[currentPet] || '';
+    petImg.alt = currentPet;
+    petImg.style.display = 'block';
 }
 
 // Покупка собачки
