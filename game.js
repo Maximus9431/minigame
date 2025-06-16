@@ -725,6 +725,17 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
         const tab = btn.getAttribute('data-tab');
         document.querySelectorAll('.tab').forEach(t => t.style.display = 'none');
         document.getElementById('tab-' + tab).style.display = 'block';
+
+        // Новый звук переключения вкладок
+        if (buttonSound) {
+            buttonSound.currentTime = 0;
+            buttonSound.play();
+        }
+
+        // Telegram вибро-отдача
+        if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+            Telegram.WebApp.HapticFeedback.impactOccurred("light");
+        }
     }
 });
 // По умолчанию показываем первую вкладку
@@ -770,6 +781,7 @@ function fullUpdateUI() {
 
 // Звук мяуканья
 const meowSound = document.getElementById('meow-sound');
+const buttonSound = document.getElementById('button-sound');
 let meowEnabled = true;
 
 // Открытие настроек
