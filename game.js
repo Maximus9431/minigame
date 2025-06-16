@@ -649,9 +649,48 @@ setInterval(function() {
 // Загрузка игры при запуске
 loadGame();
 
+// --- Telegram Mini App Support ---
 if (window.Telegram && Telegram.WebApp) {
     Telegram.WebApp.ready();
-    Telegram.WebApp.expand(); // Открыть WebApp на весь экран
+    Telegram.WebApp.expand(); // открыть на весь экран
+
+    applyTelegramTheme();
+    Telegram.WebApp.onEvent('themeChanged', applyTelegramTheme);
+
+    // MainButton — купить Booster
+    Telegram.WebApp.MainButton.setText("Buy Booster x2 (100🪙)").show();
+    Telegram.WebApp.MainButton.onClick(() => {
+        const btn = document.getElementById('booster-btn');
+        if (btn && !btn.disabled) btn.click();
+    });
+
+    // BackButton — закрывает настройки
+    Telegram.WebApp.BackButton.show();
+    Telegram.WebApp.BackButton.onClick(() => {
+        document.getElementById('settings-modal').style.display = 'none';
+    });
+}
+
+// Применить цвета темы Telegram
+function applyTelegramTheme() {
+    const tg = Telegram.WebApp;
+    if (!tg || !tg.themeParams) return;
+
+    const theme = tg.themeParams;
+    if (theme.bg_color) {
+        document.body.style.background = theme.bg_color;
+        document.getElementById('main').style.background = theme.secondary_bg_color || '#ffffff';
+    }
+    if (theme.text_color) {
+        document.body.style.color = theme.text_color;
+    }
+
+    // Кнопки
+    const buttons = document.querySelectorAll('.ui-btn, .nav-btn');
+    buttons.forEach(btn => {
+        btn.style.background = theme.button_color || '';
+        btn.style.color = theme.button_text_color || '';
+    });
 }
 
 // Сначала объявите функцию
