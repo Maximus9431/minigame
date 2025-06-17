@@ -4,11 +4,22 @@ let autoclick = false;
 let currentCat = 1;
 let xp = 0;
 let level = 1;
+let comboCount = 0;
+let comboTimeout = null;
+let comboMultiplier = 1;
+let comboActive = false;
+let jumpGameActive = false;
+let jumpScore = 0;
+let isJumping = false;
+let obstaclePosition = 0;
+let jumpInterval = null;
+let fishingGameActive = false;
+let fishingScore = 0;
+let fishingInterval = null;
 let passiveIncome = 0;
 let upgradeLevel = 1; // уровень клика
 const xpPerClick = 1;
 const xpToNextLevel = () => 10 + (level - 1) * 10;
-
 function getUpgradePrice() {
     return Math.floor(10 * Math.pow(1.5, upgradeLevel - 1));
 }
@@ -161,7 +172,9 @@ catImg.addEventListener('click', function(e) {
         window.navigator.vibrate(50); // 50 мс вибрации
     }
 
-    let reward = clickPower;
+    let reward = clickPower * (boosterActive ? 2 : 1) * comboMultiplier;
+    if (currentPet === 'dragon') reward = Math.floor(reward * 1.2);
+    if (comboActive) reward += 5; // Бонусные монеты;
     if (boosterActive) reward *= 2;
     if (currentPet === 'bird') reward = Math.floor(reward * 1.1);
     coins += reward;
@@ -189,6 +202,37 @@ catImg.addEventListener('click', function(e) {
     state.totalClicks++;
     checkAchievements(state);
     checkSkinsAchievements();
+
+    if (!comboTimeout) {
+    comboCount = 0;
+}
+comboCount++;
+clearTimeout(comboTimeout);
+comboTimeout = setTimeout(() => {
+    if (comboCount >= 10) { // 10 кликов за 3 секунды
+        activateCombo();
+    }
+    comboCount = 0;
+}, 3000);
+
+// Шанс получить дракона (1 к 5000)
+if (!ownedPets.dragon && Math.random() < 1/5000) {
+    ownedPets.dragon = true;
+    showNotification('✨ Amazing! You found a rare Dragon pet!');
+    updatePetsCollection();
+}
+
+// Шанс получить феникса (1 к 3000)
+if (!ownedPets.phoenix && Math.random() < 1/3000) {
+    ownedPets.phoenix = true;
+    showNotification('🔥 Fantastic! A Phoenix has joined you!');
+    updatePetsCollection();
+}
+
+if (currentPet) {
+    createPetEffect(currentPet, e.clientX, e.clientY);
+}
+
 });
 
 // Улучшение клика
@@ -349,8 +393,14 @@ function checkSkinsAchievements() {
 }
 
 // Питомцы
-let ownedPets = { dog: false, bird: false, cat: false, unicorn: false };
+let ownedPets = { dog: false, bird: false, cat: false, unicorn: false, dragon: false, phoenix: false };
 let currentPet = null;
+let totalClicks = 0;
+let phoenixBonuses = [
+    { type: 'coins', amount: 50, text: "+50 coins from Phoenix!" },
+    { type: 'multiplier', amount: 3, duration: 10, text: "Phoenix gift: x3 for 10 sec!" },
+    { type: 'autoclick', duration: 30, text: "Phoenix gift: Autoclick for 30 sec!" }
+];
 
 function updatePetInfo() {
     let name = 'no';
@@ -358,6 +408,8 @@ function updatePetInfo() {
     if (currentPet === 'bird') name = 'Bird';
     if (currentPet === 'cat') name = 'Cat';
     if (currentPet === 'unicorn') name = 'Unicorn';
+    if (currentPet === 'dragon') name = 'Dragon';
+    if (currentPet === 'phoenix') name = 'Phoenix';
     document.getElementById('current-pet').textContent = currentPet;
 }
 
@@ -372,7 +424,9 @@ function updatePetImage() {
         dog: 'pet_dog.png',
         bird: 'pet_bird.png',
         cat: 'pet_cat.png',
-        unicorn: 'pet_unicorn.png'
+        unicorn: 'pet_unicorn.png',
+        dragon: 'pet_dragon.png',
+        phoenix: 'pet_phoenix.png'
     };
     petImg.src = petImages[currentPet] || '';
     petImg.alt = currentPet;
@@ -699,10 +753,21 @@ function updatePetsCollection() {
     document.getElementById('coll-bird').style.opacity = ownedPets.bird ? '1' : '0.3';
     document.getElementById('coll-cat').style.opacity = ownedPets.cat ? '1' : '0.3';
     document.getElementById('coll-unicorn').style.opacity = ownedPets.unicorn ? '1' : '0.3';
+    document.getElementById('coll-dragon').style.opacity = ownedPets.dragon ? '1' : '0.3';
+    document.getElementById('coll-phoenix').style.opacity = ownedPets.phoenix ? '1' : '0.3';
+
+// Добавим дракона и феникса в коллекцию
+    if (!document.getElementById('coll-dragon')) {
+        const collection = document.getElementById('collection-list');
+        collection.innerHTML += `
+            <img src="pet_dragon.png" alt="Dragon" id="coll-dragon" style="width:40px;opacity:0.3;">
+            <img src="pet_phoenix.png" alt="Phoenix" id="coll-phoenix" style="width:40px;opacity:0.3;">
+        `;
+    }
 
     // Награда за полную коллекцию
     const rewardDiv = document.getElementById('collection-reward');
-    if (ownedPets.dog && ownedPets.bird && ownedPets.cat) {
+    if (ownedPets.dog && ownedPets.bird && ownedPets.cat && ownedPets.unicorn && ownedPets.dragon && ownedPets.phoenix) {
         rewardDiv.textContent = 'The collection is complete! Bonus: +2 to passive income.';
         if (!window._collectionRewardGiven) {
             passiveIncome += 2;
@@ -714,7 +779,7 @@ function updatePetsCollection() {
     } else {
         rewardDiv.textContent = '';
         window._collectionRewardGiven = false;
-    }
+    }  
 }
 
 // Навигация по вкладкам
@@ -825,4 +890,396 @@ function updateShopUI() {
     // обновите цену на кнопке
     document.getElementById('upgrade-btn').textContent = `Upgrade click (${getUpgradePrice()}🪙)`;
     // ...обновите другие значения, если нужно...
+}
+
+// Новая функция для активации комбо
+function activateCombo() {
+    comboMultiplier = 3;
+    comboActive = true;
+    showNotification(`Combo x${comboMultiplier}! +5 coins per click for 5 seconds!`);
+    
+    // Визуальный эффект
+    document.getElementById('cat-img').classList.add('combo-effect');
+    
+    setTimeout(() => {
+        comboMultiplier = 1;
+        comboActive = false;
+        document.getElementById('cat-img').classList.remove('combo-effect');
+        showNotification('Combo ended!');
+    }, 5000);
+}
+
+// Запуск мини-игры каждые 5 минут
+setInterval(() => {
+    if (!fishingGameActive && Math.random() < 0.3) { // 30% шанс появления
+        startFishingGame();
+    }
+}, 5 * 60 * 1000);
+
+function startFishingGame() {
+    fishingGameActive = true;
+    fishingScore = 0;
+    document.getElementById('fishing-game').style.display = 'block';
+    const fishingArea = document.getElementById('fishing-area');
+    fishingArea.innerHTML = '';
+    
+    let timeLeft = 30;
+    document.getElementById('fishing-timer').textContent = timeLeft;
+    
+    // Таймер
+    const timer = setInterval(() => {
+        timeLeft--;
+        document.getElementById('fishing-timer').textContent = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            endFishingGame();
+        }
+    }, 1000);
+    
+    // Создаем рыбок
+    fishingInterval = setInterval(() => {
+        if (timeLeft > 0) {
+            createFish();
+        }
+    }, 800);
+}
+
+function createFish() {
+    const fish = document.createElement('div');
+    fish.innerHTML = '🐟';
+    fish.style.position = 'absolute';
+    fish.style.fontSize = '40px';
+    fish.style.left = Math.random() * 80 + '%';
+    fish.style.top = Math.random() * 70 + '%';
+    fish.style.cursor = 'pointer';
+    fish.onclick = function() {
+        fishingScore += 10;
+        coins += 10;
+        updateUI();
+        this.remove();
+        showNotification('+10 coins!');
+    };
+    document.getElementById('fishing-area').appendChild(fish);
+    
+    setTimeout(() => fish.remove(), 2000);
+}
+
+function endFishingGame() {
+    clearInterval(fishingInterval);
+    fishingGameActive = false;
+    showNotification(`Fishing game over! Total: ${fishingScore} coins`);
+    document.getElementById('fishing-game').style.display = 'none';
+}
+
+document.getElementById('close-fishing').onclick = endFishingGame;
+
+// Случайный запуск игры
+setInterval(() => {
+    if (!jumpGameActive && Math.random() < 0.9) {
+        startJumpGame();
+    }
+}, 1 * 60 * 1000); // Каждые 8 минут
+
+function startJumpGame() {
+    jumpGameActive = true;
+    jumpScore = 0;
+    document.getElementById('jump-game').style.display = 'block';
+    document.getElementById('jump-score').textContent = '0';
+    isJumping = false;
+    obstaclePosition = 0;
+    
+    const obstacle = document.getElementById('jump-obstacle');
+    obstacle.style.right = '-30px';
+    
+    jumpInterval = setInterval(updateJumpGame, 20);
+}
+
+function updateJumpGame() {
+    const cat = document.getElementById('cat-jumper');
+    const obstacle = document.getElementById('jump-obstacle');
+    
+    // Движение препятствия
+    obstaclePosition += 5;
+    obstacle.style.right = `${obstaclePosition}px`;
+    
+    // Проверка столкновения
+    if (obstaclePosition >= 50 && obstaclePosition <= 80 && !isJumping) {
+        endJumpGame(false);
+    }
+    
+    // Если препятствие ушло за экран
+    if (obstaclePosition > 300) {
+        jumpScore += 10;
+        document.getElementById('jump-score').textContent = jumpScore;
+        obstaclePosition = -30;
+    }
+}
+
+// Обработчик клика для прыжка
+document.getElementById('jump-scene').onclick = function() {
+    if (!isJumping) {
+        isJumping = true;
+        const cat = document.getElementById('cat-jumper');
+        cat.style.bottom = '100px';
+        
+        setTimeout(() => {
+            cat.style.bottom = '0';
+            setTimeout(() => {
+                isJumping = false;
+            }, 300);
+        }, 500);
+    }
+};
+
+function endJumpGame(success) {
+    clearInterval(jumpInterval);
+    jumpGameActive = false;
+    document.getElementById('jump-game').style.display = 'none';
+    
+    if (success) {
+        coins += jumpScore * 2;
+        updateUI();
+        showNotification(`Great! Earned ${jumpScore * 2} coins!`);
+    } else {
+        coins += Math.floor(jumpScore / 2);
+        updateUI();
+        showNotification(`Game over! Earned ${Math.floor(jumpScore / 2)} coins.`);
+    }
+}
+
+document.getElementById('close-jump').onclick = () => endJumpGame(true);
+
+setInterval(() => {
+    if (currentPet === 'phoenix' && Math.random() < 0.3) { // 30% шанс каждые 5 минут
+        const bonus = phoenixBonuses[Math.floor(Math.random() * phoenixBonuses.length)];
+        applyPhoenixBonus(bonus);
+    }
+}, 5 * 60 * 1000); // Каждые 5 минут
+
+function applyPhoenixBonus(bonus) {
+    showNotification(bonus.text);
+    
+    switch(bonus.type) {
+        case 'coins':
+            coins += bonus.amount;
+            updateUI();
+            break;
+        case 'multiplier':
+            const oldMultiplier = clickPower;
+            clickPower *= bonus.amount;
+            setTimeout(() => {
+                clickPower = oldMultiplier;
+                showNotification("Phoenix multiplier ended");
+            }, bonus.duration * 1000);
+            break;
+        case 'autoclick':
+            if (!autoclick) {
+                autoclickTimeLeft = bonus.duration;
+                updateAutoclickTimerUI();
+                const interval = setInterval(() => {
+                    coins += clickPower;
+                    updateUI();
+                }, 1000);
+                setTimeout(() => {
+                    clearInterval(interval);
+                    autoclick = false;
+                }, bonus.duration * 1000);
+            }
+            break;
+    }
+    
+    // Визуальный эффект
+    const effect = document.createElement('div');
+    effect.className = 'phoenix-effect';
+    effect.textContent = '🔥';
+    document.getElementById('cat-area').appendChild(effect);
+    setTimeout(() => effect.remove(), 2000);
+}
+
+// Инициализация квестов
+function initQuests() {
+    const today = new Date().toDateString();
+    const savedQuests = localStorage.getItem('catQuests');
+    
+    if (savedQuests && savedQuests.date === today) {
+        quests = savedQuests.quests;
+    } else {
+        quests.forEach(q => {
+            q.progress = 0;
+            q.completed = false;
+        });
+    }
+    renderQuests();
+}
+
+// Отрисовка квестов
+function renderQuests() {
+    const list = document.getElementById('quests-list');
+    list.innerHTML = '';
+    
+    quests.forEach(quest => {
+        const li = document.createElement('li');
+        li.style.margin = '10px 0';
+        li.style.padding = '10px';
+        li.style.background = '#f5f5f5';
+        li.style.borderRadius = '8px';
+        
+        li.innerHTML = `
+            <div style="font-weight:${quest.completed ? 'bold' : 'normal'}">
+                ${quest.text} (${quest.progress}/${quest.target})
+            </div>
+            <div>Reward: ${quest.reward}🪙</div>
+            ${quest.completed ? '<div style="color:#4CAF50;">Completed!</div>' : ''}
+        `;
+        
+        list.appendChild(li);
+    });
+    
+    updateQuestButton();
+}
+
+// Проверка выполнения квестов
+function checkQuests() {
+    let anyCompleted = false;
+    
+    quests.forEach(quest => {
+        if (!quest.completed && quest.progress >= quest.target) {
+            quest.completed = true;
+            anyCompleted = true;
+            completedQuestsToday++;
+        }
+    });
+    
+    if (anyCompleted) {
+        renderQuests();
+        showNotification('Quest completed! Claim your reward.');
+    }
+    
+    saveQuests();
+}
+
+// Обновление прогресса квестов
+function updateQuestProgress(type, amount = 1) {
+    quests.forEach(quest => {
+        if (quest.completed) return;
+        
+        if (type === 'click' && quest.id.includes('click')) {
+            quest.progress += amount;
+        } else if (type === 'earn' && quest.id.includes('earn')) {
+            quest.progress = Math.min(quest.progress + amount, quest.target);
+        } else if (type === 'upgrade' && quest.id.includes('upgrade')) {
+            quest.progress += amount;
+        }
+    });
+    
+    checkQuests();
+}
+
+// В обработчик клика по коту добавить:
+updateQuestProgress('click');
+
+// При получении монет:
+function addCoins(amount) {
+    coins += amount;
+    updateQuestProgress('earn', amount);
+    updateUI();
+}
+
+// При покупке улучшения:
+updateQuestProgress('upgrade');
+
+// Кнопка получения награды
+document.getElementById('claim-reward').onclick = function() {
+    let totalReward = 0;
+    
+    quests.forEach(quest => {
+        if (quest.completed && !quest.rewardClaimed) {
+            totalReward += quest.reward;
+            quest.rewardClaimed = true;
+        }
+    });
+    
+    if (totalReward > 0) {
+        coins += totalReward;
+        updateUI();
+        showNotification(`Claimed ${totalReward} coins from quests!`);
+        renderQuests();
+    }
+};
+
+function updateQuestButton() {
+    const btn = document.getElementById('claim-reward');
+    const hasRewards = quests.some(q => q.completed && !q.rewardClaimed);
+    btn.disabled = !hasRewards;
+}
+
+function saveQuests() {
+    const today = new Date().toDateString();
+    localStorage.setItem('catQuests', JSON.stringify({
+        date: today,
+        quests: quests
+    }));
+}
+
+// Инициализация при загрузке
+initQuests();
+
+// Дракон
+document.getElementById('pet-dragon').onclick = autoSaveWrap(function() {
+    if (!ownedPets.dragon) return showNotification('You need to find the Dragon first!');
+    currentPet = 'dragon';
+    updatePetInfo();
+    updatePetImage();
+    showNotification('Dragon selected! +20% to clicks');
+});
+
+// Феникс
+document.getElementById('pet-phoenix').onclick = autoSaveWrap(function() {
+    if (!ownedPets.phoenix) {
+        showNotification('You need to unlock the Phoenix first!');
+        updatePetInfo();
+        updatePetImage();
+        return;
+    }
+    currentPet = 'phoenix';
+    updatePetInfo();
+    updatePetImage();
+    showNotification('Phoenix selected! Will grant random bonuses');
+    startPhoenixBonuses(); // Запускаем систему бонусов
+    saveGame();
+});
+
+// Новая функция для эффектов
+function createPetEffect(petType, x, y) {
+    const effect = document.createElement('div');
+    effect.style.position = 'fixed';
+    effect.style.left = `${x}px`;
+    effect.style.top = `${y}px`;
+    
+    switch(petType) {
+        case 'dog':
+            effect.className = 'paw-effect';
+            setTimeout(() => effect.remove(), 1000);
+            break;
+        case 'unicorn':
+            effect.className = 'unicorn-aura';
+            effect.style.left = `${x-50}px`;
+            effect.style.top = `${y-50}px`;
+            setTimeout(() => effect.remove(), 3000);
+            break;
+        case 'dragon':
+            effect.className = 'dragon-effect';
+            effect.textContent = '🐉';
+            setTimeout(() => effect.remove(), 2000);
+            break;
+        case 'phoenix':
+            effect.className = 'phoenix-effect';
+            effect.textContent = '🔥';
+            setTimeout(() => effect.remove(), 2000);
+            break;
+        default:
+            return;
+    }
+    
+    document.body.appendChild(effect);
 }

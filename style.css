@@ -464,3 +464,71 @@ h1 {
     color: #e57373;
     transform: scale(0.97);
 }
+
+.combo-effect {
+    animation: comboGlow 0.5s infinite alternate;
+    filter: drop-shadow(0 0 8px #ffd700);
+}
+@keyframes comboGlow {
+    from { filter: drop-shadow(0 0 8px #ffd700); }
+    to { filter: drop-shadow(0 0 15px #ff9900); }
+}
+
+/* Эффекты питомцев */
+.pet-effect {
+    position: absolute;
+    pointer-events: none;
+    z-index: 10;
+    animation: floatUp 2s forwards;
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-100px); opacity: 0; }
+}
+
+/* Дракон */
+.dragon-effect {
+    color: #ff5722;
+    font-size: 20px;
+    text-shadow: 0 0 5px #ff9800;
+}
+
+/* Феникс */
+.phoenix-effect {
+    color: #ffeb3b;
+    font-size: 24px;
+    text-shadow: 0 0 8px #ff5722;
+    animation: phoenixGlow 0.5s infinite alternate;
+}
+
+@keyframes phoenixGlow {
+    from { text-shadow: 0 0 5px #ff5722; }
+    to { text-shadow: 0 0 15px #ffeb3b, 0 0 20px #ff5722; }
+}
+
+/* Следы лап (для собаки) */
+.paw-effect {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: url('paw.png') no-repeat;
+    background-size: contain;
+    opacity: 0.7;
+}
+
+/* Аура единорога */
+.unicorn-aura {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,105,180,0.3) 0%, rgba(255,255,255,0) 70%);
+    animation: auraPulse 3s infinite;
+}
+
+@keyframes auraPulse {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+    100% { transform: scale(0.8); opacity: 0.5; }
+}

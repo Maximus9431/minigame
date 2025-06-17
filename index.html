@@ -59,6 +59,8 @@
             <button id="pet-bird" class="ui-btn">Bird (+10% to click, 800🪙)</button>
             <button id="pet-cat" class="ui-btn">Cat (+5% to passive income, 1200🪙)</button>
             <button id="pet-unicorn" class="ui-btn">Unicorn (+5 passive income)</button>
+            <button id="pet-dragon" class="ui-btn">Dragon (+20% to clicks)</button>
+            <button id="pet-phoenix" class="ui-btn">Phoenix (random bonuses)</button>
             <button id="pet-none" class="ui-btn">No pet</button>
             <div id="pet-info" style="color:#ff9800; font-size:0.98em; margin-top:6px;">
                 Current pet: <span id="current-pet">no</span>
@@ -70,6 +72,8 @@
                     <img src="pet_bird.png" alt="Птичка" id="coll-bird" style="width:40px;opacity:0.3;">
                     <img src="pet_cat.png" alt="Котёнок" id="coll-cat" style="width:40px;opacity:0.3;">
                     <img src="pet_unicorn.png" alt="Единорог" id="coll-unicorn" style="width:40px;opacity:0.3;">
+                    <img src="pet_dragon.png" alt="Dragon" id="coll-dragon" style="width:40px;opacity:0.3;">
+                    <img src="pet_phoenix.png" alt="Phoenix" id="coll-phoenix" style="width:40px;opacity:0.3;">
                 </div>
                 <div id="collection-reward" style="color:#388e3c;font-weight:bold;margin-top:8px;"></div>
             </div>
@@ -89,6 +93,15 @@
             <ul id="achievements-list"></ul>
         </div>
 
+        <div class="tab" id="tab-quests" style="display:none;">
+            <h3>Quests</h3>
+            <div id="daily-quests">
+                <h4>Daily Quests</h4>
+                <ul id="quests-list"></ul>
+            </div>
+            <button id="claim-reward" class="ui-btn" disabled>Claim Reward</button>
+        </div>        
+
         <!-- Меню вкладок -->
         <nav id="main-nav">
             <button class="nav-btn" data-tab="game">Game</button>
@@ -96,6 +109,7 @@
             <button class="nav-btn" data-tab="pets">Pets</button>
             <button class="nav-btn" data-tab="skins">Skins</button>
             <button class="nav-btn" data-tab="achievements">Achievements</button>
+            <button class="nav-btn" data-tab="quests">Quests (soon)</button>
         </nav>
 
         <!-- Модальное окно настроек -->
@@ -117,6 +131,32 @@
             <button id="reset-btn" class="ui-btn reset-btn">Reset progress</button>
           </div>
         </div>
+
+        <div id="fishing-game" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000;">
+            <div style="background:#fff; margin:20px; padding:20px; border-radius:15px; text-align:center;">
+                <h2>Fishing Time!</h2>
+                <p>Click the fish to earn coins!</p>
+                <div id="fishing-area" style="height:200px; position:relative;">
+                    <!-- Рыбки будут появляться здесь -->
+                </div>
+                <p>Time left: <span id="fishing-timer">30</span>s</p>
+                <button id="close-fishing" class="ui-btn">Close</button>
+            </div>
+        </div>        
+
+        <div id="jump-game" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000;">
+            <div style="background:#fff; margin:20px; padding:20px; border-radius:15px; text-align:center;">
+                <h2>Cat Jump!</h2>
+                <p>Click when the cat is over the obstacle!</p>
+                <div id="jump-scene" style="height:200px; position:relative; border-bottom:2px solid #000; overflow:hidden;">
+                    <div id="cat-jumper" style="position:absolute; bottom:0; left:50px; font-size:40px;">🐱</div>
+                    <div id="jump-obstacle" style="position:absolute; bottom:0; right:-30px; width:30px; height:40px; background:#f00;"></div>
+                </div>
+                <p>Score: <span id="jump-score">0</span></p>
+                <button id="close-jump" class="ui-btn">Close</button>
+            </div>
+        </div>
+
     </div>
     <audio id="meow-sound" src="meow.mp3" preload="auto"></audio>
     <audio id="button-sound" src="ui-click.mp3" preload="auto"></audio>
