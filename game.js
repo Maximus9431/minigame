@@ -489,6 +489,31 @@ document.getElementById('pet-cat').onclick = autoSaveWrap(function() {
     showNotification('Cat purchased and selected! +5% to passive income');
 });
 
+// Дракон
+document.getElementById('pet-dragon').onclick = autoSaveWrap(function() {
+    if (!ownedPets.dragon) return showNotification('You need to find the Dragon first!');
+    currentPet = 'dragon';
+    updatePetInfo();
+    updatePetImage();
+    showNotification('Dragon selected! +20% to clicks');
+});
+
+// Феникс
+document.getElementById('pet-phoenix').onclick = autoSaveWrap(function() {
+    if (!ownedPets.phoenix) {
+        showNotification('You need to unlock the Phoenix first!');
+        updatePetInfo();
+        updatePetImage();
+        return;
+    }
+    currentPet = 'phoenix';
+    updatePetInfo();
+    updatePetImage();
+    showNotification('Phoenix selected! Will grant random bonuses');
+    startPhoenixBonuses(); // Запускаем систему бонусов
+    saveGame();
+});
+
 // Снять питомца
 document.getElementById('pet-none').onclick = autoSaveWrap(function() {
     currentPet = null;
@@ -1223,31 +1248,6 @@ function saveQuests() {
 
 // Инициализация при загрузке
 initQuests();
-
-// Дракон
-document.getElementById('pet-dragon').onclick = autoSaveWrap(function() {
-    if (!ownedPets.dragon) return showNotification('You need to find the Dragon first!');
-    currentPet = 'dragon';
-    updatePetInfo();
-    updatePetImage();
-    showNotification('Dragon selected! +20% to clicks');
-});
-
-// Феникс
-document.getElementById('pet-phoenix').onclick = autoSaveWrap(function() {
-    if (!ownedPets.phoenix) {
-        showNotification('You need to unlock the Phoenix first!');
-        updatePetInfo();
-        updatePetImage();
-        return;
-    }
-    currentPet = 'phoenix';
-    updatePetInfo();
-    updatePetImage();
-    showNotification('Phoenix selected! Will grant random bonuses');
-    startPhoenixBonuses(); // Запускаем систему бонусов
-    saveGame();
-});
 
 // Новая функция для эффектов
 function createPetEffect(petType, x, y) {
