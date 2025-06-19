@@ -759,28 +759,6 @@ if (window.Telegram && Telegram.WebApp) {
     });
 }
 
-// Применить цвета темы Telegram
-function applyTelegramTheme() {
-    const tg = Telegram.WebApp;
-    if (!tg || !tg.themeParams) return;
-
-    const theme = tg.themeParams;
-    if (theme.bg_color) {
-        document.body.style.background = theme.bg_color;
-        document.getElementById('main').style.background = theme.secondary_bg_color || '#ffffff';
-    }
-    if (theme.text_color) {
-        document.body.style.color = theme.text_color;
-    }
-
-    // Кнопки
-    const buttons = document.querySelectorAll('.ui-btn, .nav-btn');
-    buttons.forEach(btn => {
-        btn.style.background = theme.button_color || '';
-        btn.style.color = theme.button_text_color || '';
-    });
-}
-
 // Сначала объявите функцию
 function updatePetsCollection() {
     document.getElementById('coll-dog').style.opacity = ownedPets.dog ? '1' : '0.3';
