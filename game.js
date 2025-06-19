@@ -730,22 +730,31 @@ loadGame();
 
 // --- Telegram Mini App Support ---
 if (window.Telegram && Telegram.WebApp) {
-    Telegram.WebApp.ready();
-    Telegram.WebApp.expand(); // открыть на весь экран
+    const tg = Telegram.WebApp;
+    tg.ready(); // Инициализация Telegram Web App
+    tg.expand(); // Открыть на весь экран
 
+    // Получаем информацию о пользователе
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        const user = tg.initDataUnsafe.user;
+        console.log("Welcome", user.first_name);
+        showNotification(`Welcome, ${user.first_name}! 🐾`);
+    }
+
+    // Применяем тему
     applyTelegramTheme();
-    Telegram.WebApp.onEvent('themeChanged', applyTelegramTheme);
+    tg.onEvent('themeChanged', applyTelegramTheme);
 
-    // MainButton — купить Booster
-    Telegram.WebApp.MainButton.setText("Buy Booster x2 (100🪙)").show();
-    Telegram.WebApp.MainButton.onClick(() => {
+    // Показываем нижнюю кнопку Telegram
+    tg.MainButton.setText("Buy Booster x2 (100🪙)").show();
+    tg.MainButton.onClick(() => {
         const btn = document.getElementById('booster-btn');
         if (btn && !btn.disabled) btn.click();
     });
 
-    // BackButton — закрывает настройки
-    Telegram.WebApp.BackButton.show();
-    Telegram.WebApp.BackButton.onClick(() => {
+    // Назад — закрыть настройки
+    tg.BackButton.show();
+    tg.BackButton.onClick(() => {
         document.getElementById('settings-modal').style.display = 'none';
     });
 }
