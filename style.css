@@ -53,6 +53,12 @@ body::after {
     display: block;
     position: relative;
     z-index: 1;
+    animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(5deg); }
+    100% { transform: translateY(0) rotate(0deg); }
 }
 #pet-img {
     width: 60px;
@@ -229,6 +235,18 @@ body::after {
     .nav-btn {
         font-size: 0.85em;
         padding: 7px 0;
+    }
+}
+/* Адаптивные улучшения */
+@media (max-width: 480px) {
+    .ui-btn {
+        font-size: 0.9em;
+        padding: 8px 0;
+    }
+    
+    #main-nav button {
+        font-size: 0.8em;
+        padding: 6px 2px;
     }
 }
 button, .ui-btn, .nav-btn, #cat-img {
@@ -466,12 +484,12 @@ h1 {
 }
 
 .combo-effect {
-    animation: comboGlow 0.5s infinite alternate;
-    filter: drop-shadow(0 0 8px #ffd700);
+    animation: glow 0.8s infinite alternate;
+    filter: drop-shadow(0 0 10px #ffeb3b);
 }
-@keyframes comboGlow {
-    from { filter: drop-shadow(0 0 8px #ffd700); }
-    to { filter: drop-shadow(0 0 15px #ff9900); }
+@keyframes glow {
+    from { filter: drop-shadow(0 0 5px #ffeb3b); }
+    to { filter: drop-shadow(0 0 20px #ff9800); }
 }
 
 /* Эффекты питомцев */
@@ -531,4 +549,17 @@ h1 {
     0% { transform: scale(0.8); opacity: 0.5; }
     50% { transform: scale(1.2); opacity: 0.8; }
     100% { transform: scale(0.8); opacity: 0.5; }
+}
+
+/* Эффекты */
+.particle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 10;
+    animation: particleAnim 1s forwards;
+}
+
+@keyframes particleAnim {
+    0% { opacity: 1; transform: translate(0, 0); }
+    100% { opacity: 0; transform: translate(var(--tx), var(--ty)); }
 }

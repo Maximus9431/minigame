@@ -21,7 +21,11 @@ let upgradeLevel = 1; // уровень клика
 const xpPerClick = 1;
 const xpToNextLevel = () => 10 + (level - 1) * 10;
 function getUpgradePrice() {
-    return Math.floor(10 * Math.pow(1.5, upgradeLevel - 1));
+    return Math.floor(15 * Math.pow(1.4, upgradeLevel - 1));
+}
+
+function getPassivePrice() {
+    return Math.floor(30 * Math.pow(1.3, passiveUpgradeCount));
 }
 
 function updateShopUI() {
@@ -206,14 +210,13 @@ catImg.addEventListener('click', function(e) {
     if (!comboTimeout) {
     comboCount = 0;
 }
+
 comboCount++;
 clearTimeout(comboTimeout);
 comboTimeout = setTimeout(() => {
-    if (comboCount >= 10) { // 10 кликов за 3 секунды
-        activateCombo();
-    }
+    if (comboCount >= 8) activateCombo();
     comboCount = 0;
-}, 3000);
+}, 2000);
 
 // Шанс получить дракона (1 к 5000)
 if (!ownedPets.dragon && Math.random() < 1/5000) {
@@ -232,6 +235,12 @@ if (!ownedPets.phoenix && Math.random() < 1/3000) {
 if (currentPet) {
     createPetEffect(currentPet, e.clientX, e.clientY);
 }
+
+updateQuestProgress('click');
+
+rareEvents.forEach(event => {
+    if (Math.random() < event.chance) event.action();
+});
 
 });
 
@@ -594,11 +603,15 @@ function loadGame() {
             }, 1000);
         }
     }
+    //passiveUpgradeCount = save.passiveUpgradeCount || 0;
     updateUI();
     updateLevelUI();
     renderAchievements();
     updatePassiveUI(); // добавлено
     updatePetsCollection();
+
+    //if (save.lastRewardDate) lastRewardDate = save.lastRewardDate;
+    //if (save.streak) streak = save.streak;
 }
 
 // Сохранять игру при каждом действии
@@ -708,12 +721,14 @@ function updatePassiveUI() {
 
 // Улучшение пассивного дохода
 document.getElementById('passive-btn').onclick = autoSaveWrap(function() {
-    if (coins < 25) return showNotification('Not enough money!');
-    coins -= 25;
-    passiveIncome++;
+    const price = getPassivePrice();
+    if (coins < price) return showNotification('Not enough money!');
+    coins -= price;
+    passiveIncome += 0.5; // Уменьшил прирост
+    passiveUpgradeCount++;
     updateUI();
     updatePassiveUI();
-    showNotification('Passive income has increased!');
+    showNotification('Passive income upgraded!');
 });
 
 // Пассивное начисление монет каждую секунду
@@ -740,10 +755,6 @@ if (window.Telegram && Telegram.WebApp) {
         console.log("Welcome", user.first_name);
         showNotification(`Welcome, ${user.first_name}! 🐾`);
     }
-
-    // Применяем тему
-    applyTelegramTheme();
-    tg.onEvent('themeChanged', applyTelegramTheme);
 
     // Показываем нижнюю кнопку Telegram
     tg.MainButton.setText("Buy Booster x2 (100🪙)").show();
@@ -904,20 +915,15 @@ function updateShopUI() {
     // ...обновите другие значения, если нужно...
 }
 
-// Новая функция для активации комбо
+// Новая функция активации комбо
 function activateCombo() {
-    comboMultiplier = 3;
-    comboActive = true;
-    showNotification(`Combo x${comboMultiplier}! +5 coins per click for 5 seconds!`);
-    
-    // Визуальный эффект
+    comboMultiplier = 2 + Math.min(3, Math.floor(comboCount/5));
+    showNotification(`COMBO x${comboMultiplier}! Keep going!`);
     document.getElementById('cat-img').classList.add('combo-effect');
     
     setTimeout(() => {
         comboMultiplier = 1;
-        comboActive = false;
         document.getElementById('cat-img').classList.remove('combo-effect');
-        showNotification('Combo ended!');
     }, 5000);
 }
 
@@ -1122,6 +1128,7 @@ function initQuests() {
         });
     }
     renderQuests();
+    checkDailyReward();
 }
 
 // Отрисовка квестов
@@ -1186,9 +1193,6 @@ function updateQuestProgress(type, amount = 1) {
     
     checkQuests();
 }
-
-// В обработчик клика по коту добавить:
-updateQuestProgress('click');
 
 // При получении монет:
 function addCoins(amount) {
@@ -1269,4 +1273,87 @@ function createPetEffect(petType, x, y) {
     }
     
     document.body.appendChild(effect);
+}
+
+const dailyRewards = [50, 100, 150, 200, 300, 500, 1000];
+let lastRewardDate = null;
+let streak = 0;
+
+function checkDailyReward() {
+    const today = new Date().toDateString();
+    if (lastRewardDate === today) return;
+    
+    if (!lastRewardDate || isConsecutiveDay(new Date(lastRewardDate), new Date())) {
+        streak = Math.min(7, streak + 1);
+    } else {
+        streak = 1;
+    }
+    
+    const reward = dailyRewards[streak - 1];
+    coins += reward;
+    lastRewardDate = today;
+    showNotification(`Daily reward: ${reward} coins! Streak: ${streak}/7`);
+    saveGame();
+}
+
+// Оптимизация монеток
+const coinPool = [];
+const MAX_COINS = 15;
+
+function createCoinElement(x, y, amount) {
+    let coin = coinPool.pop();
+    if (!coin) {
+        coin = document.createElement('div');
+        coin.className = 'coin-float';
+        document.getElementById('cat-area').appendChild(coin);
+    }
+    
+    coin.textContent = `+${amount}`;
+    coin.style.left = `${x}px`;
+    coin.style.top = `${y}px`;
+    coin.style.display = 'block';
+    
+    setTimeout(() => {
+        coin.style.display = 'none';
+        coinPool.push(coin);
+    }, 700);
+}
+
+// Дебаунс для частых UI-обновлений
+let uiUpdateTimer;
+function scheduleUIUpdate() {
+    clearTimeout(uiUpdateTimer);
+    uiUpdateTimer = setTimeout(updateUI, 100);
+}
+
+// Система редких событий
+const rareEvents = [
+    { 
+        name: "Meteor Shower", 
+        chance: 0.002, 
+        action: () => {
+            showNotification("Meteor shower! +500 coins!");
+            coins += 500;
+        }
+    },
+    {
+        name: "Lucky Cat",
+        chance: 0.005,
+        action: () => {
+            showNotification("Lucky cat visited! 2x coins for 20s");
+            const originalPower = clickPower;
+            clickPower *= 2;
+            setTimeout(() => clickPower = originalPower, 20000);
+        }
+    }
+];
+
+// Система прокачки питомцев
+const petLevels = {};
+function levelUpPet(petType) {
+    if (!petLevels[petType]) petLevels[petType] = 1;
+    else petLevels[petType]++;
+    
+    showNotification(`${petType} leveled up! Now level ${petLevels[petType]}`);
+    // Здесь можно добавить бонусы за уровни
 }
