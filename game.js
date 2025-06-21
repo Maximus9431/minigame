@@ -17,9 +17,41 @@ let fishingGameActive = false;
 let fishingScore = 0;
 let fishingInterval = null;
 let passiveIncome = 0;
+let passiveUpgradeCount = 0;
+let lastRewardDate = null;
+let streak = 0;
+let petLevels = {};
 let upgradeLevel = 1; // уровень клика
 const xpPerClick = 1;
 const xpToNextLevel = () => 10 + (level - 1) * 10;
+let uiUpdateTimer = null; // Corrected from previous error
+
+
+const dailyRewards = [50, 100, 150, 200, 300, 500, 1000]; // **Move this here**
+
+// Оптимизация монеток
+const coinPool = [];
+const MAX_COINS = 15;
+
+function createCoinElement(x, y, amount) {
+    let coin = coinPool.pop();
+    if (!coin) {
+        coin = document.createElement('div');
+        coin.className = 'coin-float';
+        document.getElementById('cat-area').appendChild(coin);
+    }
+    
+    coin.textContent = `+${amount}`;
+    coin.style.left = `${x}px`;
+    coin.style.top = `${y}px`;
+    coin.style.display = 'block';
+    
+    setTimeout(() => {
+        coin.style.display = 'none';
+        coinPool.push(coin);
+    }, 700);
+}
+
 function getUpgradePrice() {
     return Math.floor(15 * Math.pow(1.4, upgradeLevel - 1));
 }
@@ -56,6 +88,16 @@ let unlockedAchievements = [];
 
 function updateUI() {
     document.getElementById('coin-count').textContent = coins;
+    updatePassiveUI();       // Добавьте эту строку
+    updateShopUI();          // Добавьте эту строку
+    updateLevelUI();         // Добавьте эту строку
+    updateAutoclickTimerUI(); // Добавьте эту строку
+    updateBoosterTimerUI();  // Добавьте эту строку
+    updatePetInfo();         // Добавьте эту строку
+    updatePetImage();        // Добавьте эту строку
+    updatePetsCollection();  // Добавьте эту строку
+    updateUpgradeButton();   // Добавьте эту строку
+    // ИЛИ убедитесь, что они там уже есть.
 }
 
 function showNotification(text) {
@@ -151,7 +193,7 @@ catImg.addEventListener('click', function(e) {
     // Получаем координаты клика относительно картинки
     const rect = catImg.getBoundingClientRect();
     const x = e.clientX - rect.left;
-
+    
     // Определяем сторону: левая или правая половина
     if (x < rect.width / 2) {
         // Левая сторона — наклон влево
@@ -178,26 +220,20 @@ catImg.addEventListener('click', function(e) {
 
     let reward = clickPower * (boosterActive ? 2 : 1) * comboMultiplier;
     if (currentPet === 'dragon') reward = Math.floor(reward * 1.2);
-    if (comboActive) reward += 5; // Бонусные монеты;
-    if (boosterActive) reward *= 2;
     if (currentPet === 'bird') reward = Math.floor(reward * 1.1);
     coins += reward;
-    updateUI();
+    updateUI(); // Оптимизированное обновление UI
     gainXP(xpPerClick);
     catImg.classList.add('clicked');
     setTimeout(() => catImg.classList.remove('clicked'), 200);
 
-    // Всплывающая монетка
-    const coin = document.createElement('div');
-    coin.textContent = `+${reward}`;
-    coin.className = 'coin-float';
-    coin.style.left = (e.offsetX || 50) + 'px';
-    coin.style.top = (e.offsetY || 50) + 'px';
-    document.getElementById('cat-area').appendChild(coin);
-    setTimeout(() => coin.remove(), 700);
+    // ОПТИМИЗИРОВАННОЕ создание монетки
+    const offsetX = e.offsetX || rect.width / 2;
+    const offsetY = e.offsetY || rect.height / 2;
+    createCoinElement(offsetX, offsetY, reward);
 
     // Шанс получить единорога при каждом клике!
-    if (!ownedPets.unicorn && Math.random() < 1/10) { // 1 к 10 — можно изменить шанс
+    if (!ownedPets.unicorn && Math.random() < 1/2000) {
         ownedPets.unicorn = true;
         updatePetsCollection();
         showNotification('Congratulations! You got a rare pet: Unicorn 🦄');
@@ -208,40 +244,38 @@ catImg.addEventListener('click', function(e) {
     checkSkinsAchievements();
 
     if (!comboTimeout) {
-    comboCount = 0;
-}
+        comboCount = 0;
+    }
+    comboCount++;
+    clearTimeout(comboTimeout);
+    comboTimeout = setTimeout(() => {
+        if (comboCount >= 8) activateCombo();
+        comboCount = 0;
+    }, 2000);
 
-comboCount++;
-clearTimeout(comboTimeout);
-comboTimeout = setTimeout(() => {
-    if (comboCount >= 8) activateCombo();
-    comboCount = 0;
-}, 2000);
+    // Шанс получить дракона (1 к 5000)
+    if (!ownedPets.dragon && Math.random() < 1/5000) {
+        ownedPets.dragon = true;
+        showNotification('✨ Amazing! You found a rare Dragon pet!');
+        updatePetsCollection();
+    }
 
-// Шанс получить дракона (1 к 5000)
-if (!ownedPets.dragon && Math.random() < 1/5000) {
-    ownedPets.dragon = true;
-    showNotification('✨ Amazing! You found a rare Dragon pet!');
-    updatePetsCollection();
-}
+    // Шанс получить феникса (1 к 3000)
+    if (!ownedPets.phoenix && Math.random() < 1/3000) {
+        ownedPets.phoenix = true;
+        showNotification('🔥 Fantastic! A Phoenix has joined you!');
+        updatePetsCollection();
+    }
 
-// Шанс получить феникса (1 к 3000)
-if (!ownedPets.phoenix && Math.random() < 1/3000) {
-    ownedPets.phoenix = true;
-    showNotification('🔥 Fantastic! A Phoenix has joined you!');
-    updatePetsCollection();
-}
+    if (currentPet) {
+        createPetEffect(currentPet, e.clientX, e.clientY);
+    }
 
-if (currentPet) {
-    createPetEffect(currentPet, e.clientX, e.clientY);
-}
+    updateQuestProgress('click');
 
-updateQuestProgress('click');
-
-rareEvents.forEach(event => {
-    if (Math.random() < event.chance) event.action();
-});
-
+    rareEvents.forEach(event => {
+        if (Math.random() < event.chance) event.action();
+    });
 });
 
 // Улучшение клика
@@ -565,7 +599,11 @@ function saveGame() {
         ownedSkins,
         currentSkin,
         ownedPets,
-        currentPet
+        currentPet,
+        passiveUpgradeCount,
+        lastRewardDate, 
+        streak,      
+        petLevels
     };
     localStorage.setItem('catclickerSave', JSON.stringify(saveData));
 }
@@ -583,11 +621,18 @@ function loadGame() {
         level = save.level ?? 1;
         unlockedAchievements = save.unlockedAchievements ?? [];
         Object.assign(state, save.state || {});
-        passiveIncome = save.passiveIncome ?? 0; // добавлено
+        passiveIncome = save.passiveIncome ?? 0;
         ownedSkins = save.ownedSkins ?? { default: true, gold: false, achieve: false };
         currentSkin = save.currentSkin ?? 'default';
-        ownedPets = save.ownedPets ?? { dog: false, bird: false, cat: false, unicorn: false };
+        ownedPets = save.ownedPets ?? { dog: false, bird: false, cat: false, unicorn: false, dragon: false, phoenix: false };
         currentPet = save.currentPet ?? null;
+        
+        // Новые поля
+        passiveUpgradeCount = save.passiveUpgradeCount || 0;
+        lastRewardDate = save.lastRewardDate || null;
+        streak = save.streak || 0;
+        petLevels = save.petLevels || {};
+
         updateCatSkin();
         updatePetInfo();
         updatePetImage();
@@ -603,15 +648,12 @@ function loadGame() {
             }, 1000);
         }
     }
-    //passiveUpgradeCount = save.passiveUpgradeCount || 0;
     updateUI();
     updateLevelUI();
     renderAchievements();
-    updatePassiveUI(); // добавлено
+    updatePassiveUI();
     updatePetsCollection();
-
-    //if (save.lastRewardDate) lastRewardDate = save.lastRewardDate;
-    //if (save.streak) streak = save.streak;
+    checkDailyReward(); // Проверка ежедневной награды
 }
 
 // Сохранять игру при каждом действии
@@ -917,11 +959,14 @@ function updateShopUI() {
 
 // Новая функция активации комбо
 function activateCombo() {
-    comboMultiplier = 2 + Math.min(3, Math.floor(comboCount/5));
+    const newMultiplier = 2 + Math.min(3, Math.floor(comboCount/5));
+    comboMultiplier = boosterActive ? newMultiplier * 2 : newMultiplier;
+    
     showNotification(`COMBO x${comboMultiplier}! Keep going!`);
     document.getElementById('cat-img').classList.add('combo-effect');
     
-    setTimeout(() => {
+    clearTimeout(comboTimeout);
+    comboTimeout = setTimeout(() => {
         comboMultiplier = 1;
         document.getElementById('cat-img').classList.remove('combo-effect');
     }, 5000);
@@ -1009,7 +1054,7 @@ function startJumpGame() {
     const obstacle = document.getElementById('jump-obstacle');
     obstacle.style.right = '-30px';
     
-    jumpInterval = setInterval(updateJumpGame, 20);
+    jumpInterval = setInterval(updateJumpGame, 40);
 }
 
 function updateJumpGame() {
@@ -1017,11 +1062,16 @@ function updateJumpGame() {
     const obstacle = document.getElementById('jump-obstacle');
     
     // Движение препятствия
-    obstaclePosition += 5;
+    obstaclePosition += 4;
     obstacle.style.right = `${obstaclePosition}px`;
     
     // Проверка столкновения
-    if (obstaclePosition >= 50 && obstaclePosition <= 80 && !isJumping) {
+    const catRect = document.getElementById('cat-jumper').getBoundingClientRect();
+    const obstacleRect = document.getElementById('jump-obstacle').getBoundingClientRect();
+    
+    if (Math.abs(catRect.right - obstacleRect.left) < 30 && 
+        Math.abs(catRect.bottom - obstacleRect.bottom) < 40 &&
+        !isJumping) {
         endJumpGame(false);
     }
     
@@ -1115,20 +1165,26 @@ function applyPhoenixBonus(bonus) {
 }
 
 // Инициализация квестов
+const quests = [
+    { id: 'click50', text: 'Make 50 clicks', target: 50, progress: 0, completed: false, reward: 100 },
+    { id: 'earn500', text: 'Earn 500 coins', target: 500, progress: 0, completed: false, reward: 200 },
+    { id: 'upgrade5', text: 'Buy 5 upgrades', target: 5, progress: 0, completed: false, reward: 300 }
+];
+let completedQuestsToday = 0;
+
 function initQuests() {
     const today = new Date().toDateString();
-    const savedQuests = localStorage.getItem('catQuests');
+    const savedQuests = JSON.parse(localStorage.getItem('catQuests') || '{}');
     
-    if (savedQuests && savedQuests.date === today) {
-        quests = savedQuests.quests;
-    } else {
-        quests.forEach(q => {
-            q.progress = 0;
-            q.completed = false;
+    if (savedQuests.date === today) {
+        quests.forEach((q, i) => {
+            if (savedQuests.quests[i]) {
+                q.progress = savedQuests.quests[i].progress;
+                q.completed = savedQuests.quests[i].completed;
+            }
         });
     }
     renderQuests();
-    checkDailyReward();
 }
 
 // Отрисовка квестов
@@ -1275,10 +1331,6 @@ function createPetEffect(petType, x, y) {
     document.body.appendChild(effect);
 }
 
-const dailyRewards = [50, 100, 150, 200, 300, 500, 1000];
-let lastRewardDate = null;
-let streak = 0;
-
 function checkDailyReward() {
     const today = new Date().toDateString();
     if (lastRewardDate === today) return;
@@ -1296,35 +1348,7 @@ function checkDailyReward() {
     saveGame();
 }
 
-// Оптимизация монеток
-const coinPool = [];
-const MAX_COINS = 15;
 
-function createCoinElement(x, y, amount) {
-    let coin = coinPool.pop();
-    if (!coin) {
-        coin = document.createElement('div');
-        coin.className = 'coin-float';
-        document.getElementById('cat-area').appendChild(coin);
-    }
-    
-    coin.textContent = `+${amount}`;
-    coin.style.left = `${x}px`;
-    coin.style.top = `${y}px`;
-    coin.style.display = 'block';
-    
-    setTimeout(() => {
-        coin.style.display = 'none';
-        coinPool.push(coin);
-    }, 700);
-}
-
-// Дебаунс для частых UI-обновлений
-let uiUpdateTimer;
-function scheduleUIUpdate() {
-    clearTimeout(uiUpdateTimer);
-    uiUpdateTimer = setTimeout(updateUI, 100);
-}
 
 // Система редких событий
 const rareEvents = [
@@ -1349,11 +1373,28 @@ const rareEvents = [
 ];
 
 // Система прокачки питомцев
-const petLevels = {};
 function levelUpPet(petType) {
     if (!petLevels[petType]) petLevels[petType] = 1;
     else petLevels[petType]++;
     
     showNotification(`${petType} leveled up! Now level ${petLevels[petType]}`);
-    // Здесь можно добавить бонусы за уровни
+    
+    // Добавляем бонусы за уровни
+    switch(petType) {
+        case 'dog':
+            passiveIncome += 0.2;
+            break;
+        case 'bird':
+            clickPower += 0.1;
+            break;
+        case 'cat':
+            passiveIncome += 0.3;
+            break;
+    }
+    updatePassiveUI();
+}
+
+function isConsecutiveDay(prevDate, currentDate) {
+    const oneDay = 24 * 60 * 60 * 1000;
+    return Math.abs(currentDate - prevDate) < 2 * oneDay;
 }
