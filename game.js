@@ -945,6 +945,38 @@ function vibrate(duration) {
 document.addEventListener('DOMContentLoaded', () => {
     loadGame();
 
+    // ========= НАЧАЛО ВСТАВКИ =========
+    try {
+        if (Telegram && Telegram.WebApp) {
+            const tg = Telegram.WebApp;
+
+            // 1. Расширяем окно на весь экран
+            tg.expand();
+
+            // 2. Устанавливаем цвет хедера такой же, как фон приложения.
+            tg.setHeaderColor('secondary_bg_color');
+
+            // 3. Настраиваем главную кнопку (снизу) для закрытия приложения.
+            tg.MainButton.setText('Закрыть игру');
+            tg.MainButton.show();
+            tg.onEvent('mainButtonClicked', function(){
+                tg.close();
+            });
+
+            // 4. Включаем системную кнопку "Назад" (свернуть).
+            tg.BackButton.show();
+            tg.onEvent('backButtonClicked', function() {
+                tg.close();
+            });
+
+            // Уведомление об успешной интеграции
+            showNotification('Интеграция с Telegram активна!', 'success');
+        }
+    } catch (e) {
+        console.error('Ошибка интеграции с Telegram:', e);
+    }
+    // ========= КОНЕЦ ВСТАВКИ =========
+
     document.getElementById('cat-area').addEventListener('click', handleCatClick);
 
     // Settings overlay display/hide
@@ -999,3 +1031,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateUI();
 });
+

@@ -849,3 +849,19 @@ body.dark-theme .slider {
 input:checked + .slider.round {
     background-color: #2ecc71; /* Green for theme switch in dark mode */
 }
+
+/* Улучшение интерактивности для сенсорных экранов */
+#cat-area, .tab-button, .ui-btn {
+    /* Отключает стандартную синюю подсветку при нажатии в Chrome на Android */
+    -webkit-tap-highlight-color: transparent; 
+    
+    /* Предотвращает случайное выделение текста при быстрых нажатиях */
+    user-select: none; 
+    -webkit-user-select: none; /* для Safari */
+}
+
+/* Небольшое увеличение области нажатия для кнопок вкладок */
+.tab-button {
+    padding: 12px 10px; /* Сделаем вертикальный отступ чуть больше для удобства */
+    font-size: 0.95em; /* Можно немного скорректировать шрифт, если нужно */
+}
