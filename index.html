@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title>CatClicker</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <script src="https://telegram.org/js/telegram-web-app.js?57"></script>
@@ -13,155 +14,209 @@
     <div id="main">
         <h1>
           CatClicker
-          <span id="settings-btn" style="cursor:pointer; margin-left:8px; font-size:0.9em;" title="Настройки">🐾</span>
+          <span id="settings-btn" style="cursor:pointer; margin-left:8px; font-size:0.9em;" title="Настройки">
+            <i class="fa-solid fa-paw"></i> </span>
         </h1>
 
-        <!-- Вкладка Игра -->
-        <div class="tab" id="tab-game">
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('tab-game')"><i class="fa-solid fa-cat"></i> Game</button>
+            <button class="tab-button" onclick="showTab('tab-shop')"><i class="fas fa-store"></i> Shop</button>
+            <button class="tab-button" onclick="showTab('tab-pets')"><i class="fas fa-paw"></i> Pets</button>
+            <button class="tab-button" onclick="showTab('tab-minigames')"><i class="fas fa-gamepad"></i> Mini-games</button>
+        </div>
+
+        <div class="tab-content" id="tab-game">
             <div id="cat-area">
                 <img id="cat-img" src="cat1.png" alt="Котик" />
-                <img id="pet-img" src="" alt="" style="width:60px;height:60px;display:block;position:absolute;left:10px;bottom:10px;z-index: 2;">
+                <div id="combo-display"></div>
             </div>
-            <div id="coins">Money: <span id="coin-count">0</span></div>
-            <div id="level-area">
-                <span>Level: <span id="level">1</span></span>
-                <div id="xp-bar" style="background:#eee;width:100px;height:10px;display:inline-block;vertical-align:middle;">
-                    <div id="xp-progress" style="background:#aaf;width:0;height:10px;"></div>
+            <div class="game-stats">
+                <p>Coins: <span id="coins">0</span></p>
+                <p>Level: <span id="level">1</span></p>
+                <div id="xp-bar-container">
+                    <div id="xp-bar"></div>
+                </div>
+                <p id="xp-bar-text">XP: 0/10</p>
+            </div>
+            <div class="daily-reward-section">
+                <button id="daily-reward-btn" class="ui-btn"><i class="fas fa-gift"></i> Daily reward</button>
+            </div>
+            <div id="autoclick-info" style="text-align: center; margin-top: 15px; font-size: 0.9em; color: #666;">
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-shop" style="display:none;">
+            <div class="shop-section">
+                <h3>Улучшения клика</h3>
+                <div class="upgrade-item" id="upgrade-click-item">
+                    <div class="item-info">
+                        <h4>Мощный клик <span id="upgrade-level-display">(Ур. 1)</span></h4>
+                        <p>Увеличивает количество монет за клик.</p>
+                    </div>
+                    <span class="item-price" id="upgrade-click-price">10</span>
+                    <button class="ui-btn buy-btn" onclick="buyUpgrade('click')"><i class="fa-solid fa-dollar-sign"></i> Купить</button>
+                </div>
+                <div class="upgrade-item" id="upgrade-autoclick-item">
+                    <div class="item-info">
+                        <h4>Автоматический клик <span id="autoclick-level-display">(Ур. 0)</span></h4>
+                        <p>Получайте монеты каждую секунду.</p>
+                    </div>
+                    <span class="item-price" id="autoclick-price">50</span>
+                    <button class="ui-btn buy-btn" onclick="buyUpgrade('autoclick')"><i class="fa-solid fa-dollar-sign"></i> Купить</button>
+                </div>
+                <div class="upgrade-item" id="upgrade-passive-item">
+                    <div class="item-info">
+                        <h4>Пассивный доход <span id="passive-level-display">(Ур. 0)</span></h4>
+                        <p>Постоянно приносит монеты.</p>
+                    </div>
+                    <span class="item-price" id="passive-price">100</span>
+                    <button class="ui-btn buy-btn" onclick="buyUpgrade('passive')"><i class="fa-solid fa-dollar-sign"></i> Купить</button>
                 </div>
             </div>
-            <div id="autoclick-timer" style="color:#ff9800; font-size:0.98em; min-height:18px;"></div>
-            <span id="booster-timer" style="color:#ff9800;font-weight:bold;"></span>
-            <button id="autoclick-btn" class="ui-btn">Autoclicker (50🪙)</button>
-            <button id="booster-btn" class="ui-btn">Booster x2 (100🪙)</button>
-            <div id="notification"></div>
         </div>
 
-        <!-- Вкладка Магазин -->
-        <div class="tab" id="tab-shop" style="display:none;">
-            <button id="upgrade-btn" class="ui-btn">Upgrade click (10🪙)</button>
-            <div id="click-info" style="margin:8px 0; color:#888; font-size:0.98em;">
-                Click level: <span id="click-level">1</span>
-            </div>
-            <button id="passive-btn" class="ui-btn">Upgrade passive income (25🪙)</button>
-            <div id="passive-info" style="margin:8px 0; color:#888; font-size:0.98em;">
-                Passive income: <span id="passive-value">0</span> money/sec
-            </div>
-            <div id="shop">
-                <h3>Cat's shop</h3>
-                <button id="buy-cat2" class="ui-btn">Cat №2 (100🪙)</button>
-                <button id="buy-cat3" class="ui-btn">Cat №3 (donate)</button>
-            </div>
-        </div>
-
-        <!-- Вкладка Питомцы -->
-        <div class="tab" id="tab-pets" style="display:none;">
-            <h3>Pets</h3>
-            <button id="pet-dog" class="ui-btn">Dog (+1 passive income, 500🪙)</button>
-            <button id="pet-bird" class="ui-btn">Bird (+10% to click, 800🪙)</button>
-            <button id="pet-cat" class="ui-btn">Cat (+5% to passive income, 1200🪙)</button>
-            <button id="pet-unicorn" class="ui-btn">Unicorn (+5 passive income)</button>
-            <button id="pet-dragon" class="ui-btn">Dragon (+20% to clicks)</button>
-            <button id="pet-phoenix" class="ui-btn">Phoenix (random bonuses)</button>
-            <button id="pet-none" class="ui-btn">No pet</button>
-            <div id="pet-info" style="color:#ff9800; font-size:0.98em; margin-top:6px;">
-                Current pet: <span id="current-pet"></span>
-            </div>
-            <div id="pets-collection" style="margin-top:18px;">
-                <h3>Collection of pets</h3>
-                <div id="collection-list" style="display:flex;gap:10px;">
-                    <img src="pet_dog.png" alt="Собачка" id="coll-dog" style="width:50px;height:50px;opacity:0.3;">
-                    <img src="pet_bird.png" alt="Птичка" id="coll-bird" style="width:50px;height:50px;opacity:0.3;">
-                    <img src="pet_cat.png" alt="Котёнок" id="coll-cat" style="width:50px;height:50px;opacity:0.3;">
-                    <img src="pet_unicorn.png" alt="Единорог" id="coll-unicorn" style="width:50px;height:50px;opacity:0.3;">
-                    <img src="pet_dragon.png" alt="Dragon" id="coll-dragon" style="width:50px;height:50px;opacity:0.3;">
-                    <img src="pet_phoenix.png" alt="Phoenix" id="coll-phoenix" style="width:50px;height:50px;opacity:0.3;">
+        <div class="tab-content" id="tab-pets" style="display:none;">
+            <div class="pets-section">
+                <h3>My pets</h3>
+                <div id="pets-list">
                 </div>
-                <div id="collection-reward" style="color:#37c4dd;font-weight:bold;margin-top:8px;"></div>
+                <div class="shop-section" style="margin-top: 25px;">
+                    <h3>Buy new pets</h3>
+                    <div class="pet-item" id="pet-dog-item">
+                        <div class="item-info">
+                            <h4>Dog</h4>
+                            <p>Увеличивает пассивный доход.</p>
+                        </div>
+                        <span class="item-price">500</span>
+                        <button class="ui-btn buy-btn" onclick="buyPet('dog')"><i class="fas fa-dog"></i> Купить</button>
+                    </div>
+                    <div class="pet-item" id="pet-dragon-item">
+                        <div class="item-info">
+                            <h4>Dragon</h4>
+                            <p>Очень редкий. Увеличивает силу клика.</p>
+                        </div>
+                        <span class="item-price">5000</span>
+                        <button class="ui-btn buy-btn" onclick="buyPet('dragon')"><i class="fas fa-dragon"></i> Купить</button>
+                    </div>
+                    <div class="pet-item" id="pet-phoenix-item">
+                        <div class="item-info">
+                            <h4>Phoenix</h4>
+                            <p>Очень редкий. Дает бонус к XP.</p>
+                        </div>
+                        <span class="item-price">7500</span>
+                        <button class="ui-btn buy-btn" onclick="buyPet('phoenix')"><i class="fas fa-fire"></i> Купить</button>
+                    </div>
+                     <div class="pet-item" id="pet-unicorn-item">
+                        <div class="item-info">
+                            <h4>Unicorn</h4>
+                            <p>Очень редкий. Повышает шанс редких событий (критических кликов).</p>
+                        </div>
+                        <span class="item-price">10000</span>
+                        <button class="ui-btn buy-btn" onclick="buyPet('unicorn')"><i class="fa-solid fa-unicorn"></i> Купить</button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Вкладка Скины -->
-        <div class="tab" id="tab-skins" style="display:none;">
-            <h3>Сat skins</h3>
-            <button id="skin-default" class="ui-btn">Default (free)</button>
-            <button id="skin-gold" class="ui-btn">ЗGold cat (open for 1000 coins)</button>
-            <button id="skin-achieve" class="ui-btn">Achievement: 100 clicks</button>
-        </div>
-
-        <!-- Вкладка Достижения -->
-        <div class="tab" id="tab-achievements" style="display:none;">
-            <h3>Achievements</h3>
-            <ul id="achievements-list"></ul>
-        </div>
-
-        <div class="tab" id="tab-quests" style="display:none;">
-            <h3>Quests</h3>
-            <div id="daily-quests">
-                <h4>Daily Quests</h4>
-                <ul id="quests-list"></ul>
+        <div class="tab-content" id="tab-minigames" style="display:none;">
+            <div class="mini-games-section">
+                <h3>Mini-games</h3>
+                <div class="game-item">
+                    <div class="item-info">
+                        <h4>Fishing</h4>
+                        <p>Нажимайте на рыбок, чтобы поймать их!</p>
+                    </div>
+                    <button class="ui-btn" onclick="startGame('fishing')"><i class="fas fa-fish"></i> Играть</button>
+                </div>
+                <div class="game-item">
+                    <div class="item-info">
+                        <h4>Jumping cat</h4>
+                        <p>Прыгайте через препятствия!</p>
+                    </div>
+                    <button class="ui-btn" onclick="startGame('jump')"><i class="fas fa-shoe-prints"></i> Играть</button>
+                </div>
             </div>
-            <button id="claim-reward" class="ui-btn" disabled>Claim Reward</button>
-        </div>        
-
-        <!-- Меню вкладок -->
-        <nav id="main-nav">
-            <button class="nav-btn" data-tab="game">Game</button>
-            <button class="nav-btn" data-tab="shop">Shop</button>
-            <button class="nav-btn" data-tab="pets">Pets</button>
-            <button class="nav-btn" data-tab="skins">Skins</button>
-            <button class="nav-btn" data-tab="achievements">Achievements</button>
-            <button class="nav-btn" data-tab="quests">Quests (soon)</button>
-        </nav>
-
-        <!-- Модальное окно настроек -->
-        <div id="settings-modal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); z-index:999; align-items:center; justify-content:center;">
-          <div class="settings-content">
-            <button id="close-settings" class="settings-close-btn">✖️</button>
-            <h3 style="margin-top:0;">Settings</h3>
-            <label class="switch-label">
-              <input type="checkbox" id="meow-toggle" checked>
-              <span class="switch-slider"></span>
-              Meow sound
-            </label>
-            <label class="switch-label">
-              <input type="checkbox" id="vibration-toggle" checked>
-              <span class="switch-slider"></span>
-              Vibration (soon)
-            </label>
-            <hr class="settings-divider">
-            <button id="reset-btn" class="ui-btn reset-btn">Reset progress</button>
-          </div>
+            <div class="mini-games-section" style="margin-top: 25px;">
+                <h3>Records</h3>
+                <h4>Fishing</h4>
+                <ul id="fishing-high-scores">
+                    </ul>
+                <h4>Jumping cat</h4>
+                <ul id="jump-high-scores">
+                    </ul>
+            </div>
         </div>
 
-        <div id="fishing-game" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000;">
+        <div id="settings-overlay" class="modal-overlay">
+            <div id="settings-panel" class="modal-content">
+                <button id="close-settings" class="modal-close-btn"><i class="fa-solid fa-paw"></i></button>
+                <h2>Settings</h2>
+
+                <div class="setting-category">
+                    <h3>Global</h3>
+                    <div class="setting-item">
+                        <span>Sound</span>
+                        <label class="switch">
+                            <input type="checkbox" id="sound-toggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <span>Vibration</span>
+                        <label class="switch">
+                            <input type="checkbox" id="vibration-toggle" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <span>Theme dark/light</span>
+                        <label class="switch theme-switch">
+                            <input type="checkbox" id="theme-toggle" checked> <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="setting-category">
+                    <h3>Save and Reset</h3>
+                    <div class="button-group">
+                        <button id="save-btn" class="ui-btn"><i class="fas fa-save"></i> Save game</button>
+                        <button id="load-btn" class="ui-btn"><i class="fas fa-upload"></i> Load game</button>
+                    </div>
+                    <button id="reset-pets-btn" class="ui-btn danger-btn" onclick="resetPetsConfirmation()"><i class="fas fa-paw"></i> Reset pets</button>
+                    <button id="reset-btn" class="ui-btn danger-btn" onclick="resetGameConfirmation()"><i class="fas fa-redo"></i> Reset game</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="notification-container"></div>
+        
+        <div id="fishing-game" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:1000;">
             <div style="background:#fff; margin:20px; padding:20px; border-radius:15px; text-align:center;">
-                <h2>Fishing Time!</h2>
-                <p>Click the fish to earn coins!</p>
-                <div id="fishing-area" style="height:200px; position:relative;">
-                    <!-- Рыбки будут появляться здесь -->
-                </div>
-                <p>Time left: <span id="fishing-timer">30</span>s</p>
-                <button id="close-fishing" class="ui-btn">Close</button>
+                <h2>Кошачья Рыбалка!</h2>
+                <p>Нажимайте на рыбок, чтобы поймать их!</p>
+                <div id="fishing-scene" style="height:250px; position:relative; background: linear-gradient(to bottom, #87CEEB, #4682B4); border: 2px solid #333; border-radius: 10px; overflow: hidden;">
+                    </div>
+                <p>Осталось времени: <span id="fishing-timer">30</span>с</p>
+                <p>Очки: <span id="fishing-score-display">0</span></p>
+                <button id="close-fishing" class="ui-btn">Закрыть</button>
             </div>
-        </div>        
+        </div>     
 
-        <div id="jump-game" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000;">
+        <div id="jump-game" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:1000;">
             <div style="background:#fff; margin:20px; padding:20px; border-radius:15px; text-align:center;">
                 <h2>Cat Jump!</h2>
-                <p>Click when the cat is over the obstacle!</p>
-                <div id="jump-scene" style="height:200px; position:relative; border-bottom:2px solid #000; overflow:hidden;">
+                <p>Нажмите, чтобы кот прыгнул!</p>
+                <div id="jump-scene" style="height:200px; position:relative; background: linear-gradient(to top, #c7e9fb, #a7d9f7); border-bottom:2px solid #555; overflow:hidden;">
                     <div id="cat-jumper" style="position:absolute; bottom:0; left:50px; font-size:40px;">🐱</div>
                     <div id="jump-obstacle" style="position:absolute; bottom:0; right:-30px; width:30px; height:40px; background:#f00;"></div>
                 </div>
-                <p>Score: <span id="jump-score">0</span></p>
-                <button id="close-jump" class="ui-btn">Close</button>
+                <p>Очки: <span id="jump-score">0</span></p>
+                <button id="close-jump" class="ui-btn">Закрыть</button>
             </div>
         </div>
 
     </div>
-    <audio id="meow-sound" src="meow.mp3" preload="auto"></audio>
-    <audio id="button-sound" src="ui-click.mp3" preload="auto"></audio>
+
     <script src="game.js"></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </body>
 </html>
