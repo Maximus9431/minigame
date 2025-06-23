@@ -956,14 +956,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 2. Устанавливаем цвет хедера такой же, как фон приложения.
             tg.setHeaderColor('secondary_bg_color');
 
-            // 3. Настраиваем главную кнопку (снизу) для закрытия приложения.
-            tg.MainButton.setText('Закрыть игру');
-            tg.MainButton.show();
-            tg.onEvent('mainButtonClicked', function(){
-                tg.close();
-            });
-
-            // 4. Включаем системную кнопку "Назад" (свернуть).
+            // 3. Включаем системную кнопку "Назад" (свернуть).
             tg.BackButton.show();
             tg.onEvent('backButtonClicked', function() {
                 tg.close();
