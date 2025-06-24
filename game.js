@@ -174,9 +174,9 @@ function updateUI() {
     document.getElementById('autoclick-level-display').textContent = `(Ур. ${autoclickLevel})`;
     const autoclickInfo = document.getElementById('autoclick-info');
     if (autoclickLevel > 0) {
-        autoclickInfo.textContent = `Автоклик активен. Монет/сек: ${autoclickLevel}`;
+        autoclickInfo.textContent = `Auto-click is active. Coins/sec: ${autoclickLevel}`;
     } else {
-        autoclickInfo.textContent = 'Купите автоклик в магазине!';
+        autoclickInfo.textContent = 'Buy an autoclicker at the shop!';
     }
     
     document.getElementById('passive-price').textContent = calculateUpgradeCost('passive');
@@ -379,8 +379,8 @@ function updatePetsUI() {
             petDiv.innerHTML = `
                 <div class="item-info">
                     <h4>${petType.charAt(0).toUpperCase() + petType.slice(1)}</h4>
-                    <p>Уровень: ${petLevels[petType]}</p>
-                    <p>Бонус: ${getPetBonusDescription(petType, petLevels[petType])}</p>
+                    <p>Level: ${petLevels[petType]}</p>
+                    <p>Bonus: ${getPetBonusDescription(petType, petLevels[petType])}</p>
                 </div>
                 <span class="item-price">${getPetLevelUpCost(petType)}</span>
                 <button class="ui-btn buy-btn" onclick="levelUpPet('${petType}')">
@@ -392,20 +392,20 @@ function updatePetsUI() {
     }
 
     if (!hasPets) {
-        petsList.innerHTML = '<p style="text-align: center; color: #777;">У вас пока нет питомцев. Купите их в магазине!</p>';
+        petsList.innerHTML = '<p style="text-align: center; color: #777;">You do not have any pets yet. Buy them in the store!</p>';
     }
 }
 
 function getPetBonusDescription(petType, level) {
     switch(petType) {
         case 'dog':
-            return `+${(0.2 * level).toFixed(1)} к пассивному доходу`;
+            return `+${(0.2 * level).toFixed(1)} to passive income`;
         case 'dragon':
-            return `+${(0.5 * level).toFixed(1)} к силе клика`;
+            return `+${(0.5 * level).toFixed(1)} to the power of click`;
         case 'phoenix':
-            return `+${(0.05 * level).toFixed(2)} к пассивному доходу (XP бонус)`; // Changed to passive income
+            return `+${(0.05 * level).toFixed(2)} to passive income (XP bonus)`; // Changed to passive income
         case 'unicorn':
-            return `+${(0.001 * level * 100).toFixed(2)}% к шансу крит. клика`;
+            return `+${(0.001 * level * 100).toFixed(2)}% to the chance of critical click`;
         default:
             return '';
     }
@@ -425,7 +425,7 @@ function checkDailyReward() {
     const dailyRewardBtn = document.getElementById('daily-reward-btn');
 
     if (lastRewardDate === today) {
-        showNotification("Вы уже забрали сегодняшнюю награду!");
+        showNotification("You have already claimed today's reward!");
         dailyRewardBtn.disabled = true; // Disable button if already claimed
         return;
     } else {
@@ -453,7 +453,7 @@ function checkDailyReward() {
         const reward = dailyRewards[streak - 1];
         coins += reward;
         lastRewardDate = today;
-        showNotification(`Ежедневная награда: ${reward} монет! Серия: ${streak}/7`, 'green');
+        showNotification(`Daily reward: ${reward} coins! Streak: ${streak}/7`, 'green');
         dailyRewardBtn.classList.remove('glow');
         dailyRewardBtn.disabled = true; // Disable after claiming
         dailyRewardBtn.onclick = null; // Remove onclick handler
@@ -466,44 +466,44 @@ function checkDailyReward() {
 
 const rareEvents = [
     {
-        name: "Метеоритный дождь",
+        name: "Meteor shower",
         chance: 0.002, // 0.2%
         action: () => {
             const bonus = 500 * level;
             coins += bonus;
-            showNotification(`Метеоритный дождь! +${bonus} монет!`, 'success');
+            showNotification(`Meteor shower! +${bonus} coins!`, 'success');
         }
     },
     {
-        name: "Счастливый кот",
+        name: "Happy cat",
         chance: 0.005, // 0.5%
         action: () => {
-            showNotification("Счастливый кот! Монеты за клик x2 на 20 секунд!", 'success');
+            showNotification("Happy cat! Coins for click x2 for 20 seconds!", 'success');
             const originalPower = clickPower;
             clickPower *= 2;
             setTimeout(() => {
                 clickPower = originalPower;
-                showNotification("Эффект Счастливого кота закончился.", 'info');
+                showNotification("The Happy Cat effect is over.", 'info');
                 updateUI();
             }, 20000);
         }
     },
     {
-        name: "Золотая рыбка",
+        name: "Gold fish",
         chance: 0.003, // 0.3%
         action: () => {
-            showNotification("Золотая рыбка! Откройте мини-игру Рыбалка для супер-бонуса!", 'warning');
+            showNotification("Gold fish! Open the mini-game Fishing for super bonus!", 'warning');
             // This could set a flag for the fishing game to spawn a special fish
             localStorage.setItem('goldenFishBonus', 'true');
         }
     },
     {
-        name: "Тайник с XP",
+        name: "Stash with XP",
         chance: 0.004, // 0.4%
         action: () => {
             const bonusXP = 50 + level * 5;
             xp += bonusXP;
-            showNotification(`Вы нашли тайник с XP! +${bonusXP} XP!`, 'success');
+            showNotification(`You found a stash with XP! +${bonusXP} XP!`, 'success');
             updateUI();
         }
     }
@@ -625,7 +625,7 @@ function endFishingGame() {
     const finalBonus = fishingScore * 2;
     coins += finalBonus;
     xp += fishingScore;
-    showNotification(`Рыбалка окончена! Вы заработали ${fishingScore} очков и ${finalBonus} монет!`, 'success');
+    showNotification(`Fishing is over! You earned ${fishingScore} points & ${finalBonus} coins!`, 'success');
     
     // Update high score for fishing
     fishingHighScores.push(fishingScore);
@@ -687,7 +687,7 @@ function startJumpGame() {
             obstaclePosition = -30;
             jumpScore++;
             jumpScoreDisplay.textContent = jumpScore;
-            showNotification(`Очко! Текущий счет: ${jumpScore}`, 'info');
+            showNotification(`Point! Current score: ${jumpScore}`, 'info');
             obstacleSpeed += 0.2; // Make it harder over time
         }
 
@@ -726,7 +726,7 @@ function endJumpGame() {
     const finalBonus = jumpScore * 5;
     coins += finalBonus;
     xp += jumpScore * 2;
-    showNotification(`Прыжки окончены! Вы набрали ${jumpScore} очков и заработали ${finalBonus} монет!`, 'success');
+    showNotification(`The jumps are over! You scored ${jumpScore} points & earned ${finalBonus} coins!`, 'success');
 
     // Update high score for jump
     jumpHighScores.push(jumpScore);
@@ -745,11 +745,11 @@ function updateMiniGameHighScoresUI() {
     const fishingScoresList = document.getElementById('fishing-high-scores');
     fishingScoresList.innerHTML = '';
     if (fishingHighScores.length === 0) {
-        fishingScoresList.innerHTML = '<p>Нет рекордов.</p>';
+        fishingScoresList.innerHTML = '<p>No records.</p>';
     } else {
         fishingHighScores.forEach((score, index) => {
             const li = document.createElement('li');
-            li.textContent = `#${index + 1}: ${score} очков`;
+            li.textContent = `#${index + 1}: ${score} points`;
             fishingScoresList.appendChild(li);
         });
     }
@@ -757,11 +757,11 @@ function updateMiniGameHighScoresUI() {
     const jumpScoresList = document.getElementById('jump-high-scores');
     jumpScoresList.innerHTML = '';
     if (jumpHighScores.length === 0) {
-        jumpScoresList.innerHTML = '<p>Нет рекордов.</p>';
+        jumpScoresList.innerHTML = '<p>No records.</p>';
     } else {
         jumpHighScores.forEach((score, index) => {
             const li = document.createElement('li');
-            li.textContent = `#${index + 1}: ${score} очков`;
+            li.textContent = `#${index + 1}: ${score} points`;
             jumpScoresList.appendChild(li);
         });
     }
@@ -792,7 +792,7 @@ function saveGame() {
         currentTheme // Save theme preference
     };
     localStorage.setItem('catClickerGame', JSON.stringify(gameData));
-    showNotification('Игра сохранена!', 'info');
+    showNotification('The game is saved!', 'info');
     if (Telegram && Telegram.WebApp) {
         Telegram.WebApp.HapticFeedback.impactOccurred('light');
     }
@@ -829,15 +829,15 @@ function loadGame() {
         applyTheme(currentTheme); // Apply theme on load
         applyPetBonus(); // Reapply pet bonuses after loading to ensure stats are correct
 
-        showNotification('Игра загружена!', 'info');
+        showNotification('Game loaded!', 'info');
     } else {
-        showNotification('Нет сохраненных игр для загрузки.', 'warning');
+        showNotification('There are no saved games to load.', 'warning');
     }
     updateUI();
 }
 
 function resetGameConfirmation() {
-    if (confirm("Вы уверены, что хотите сбросить игру? Все данные будут утеряны!")) {
+    if (confirm("Are you sure you want to reset the game? All data will be lost!")) {
         resetGame();
     }
 }
@@ -878,7 +878,7 @@ function resetGame() {
 }
 
 function resetPetsConfirmation() {
-    if (confirm("Вы уверены, что хотите сбросить всех питомцев? Вы потеряете все уровни питомцев!")) {
+    if (confirm("Are you sure you want to reset all pets? You will lose all pet levels!")) {
         resetPets();
     }
 }
@@ -886,7 +886,7 @@ function resetPetsConfirmation() {
 function resetPets() {
     petLevels = {};
     applyPetBonus(); // Reapply bonuses after resetting pets
-    showNotification('Питомцы сброшены!', 'warning');
+    showNotification('The pets are abandoned!', 'warning');
     updateUI();
     saveGame();
 }
@@ -961,12 +961,9 @@ document.addEventListener('DOMContentLoaded', () => {
             tg.onEvent('backButtonClicked', function() {
                 tg.close();
             });
-
-            // Уведомление об успешной интеграции
-            showNotification('Интеграция с Telegram активна!', 'success');
         }
     } catch (e) {
-        console.error('Ошибка интеграции с Telegram:', e);
+        console.error('Integration error with Telegram:', e);
     }
     // ========= КОНЕЦ ВСТАВКИ =========
 
