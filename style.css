@@ -58,7 +58,11 @@ h1 {
 /* Вкладки (Tabs) */
 .tabs {
     display: flex;
-    justify-content: center;
+    overflow-x: auto; /* Позволяет горизонтальный скролл */
+    -webkit-overflow-scrolling: touch; /* Для плавного скролла на iOS */
+    white-space: nowrap; /* Предотвращает перенос кнопок на новую строку */
+    justify-content: flex-start;
+    gap: 4px; /* Расстояние между кнопками */
     margin-bottom: 20px;
     background-color: #e0e7f1; /* Легкий фон для панели вкладок */
     border-radius: 15px;
@@ -67,29 +71,70 @@ h1 {
     transition: background-color 0.3s ease;
 }
 
-.tab-button {
-    background: none;
-    border: none;
-    padding: 12px 25px;
-    font-size: 1.1em;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
+.tabs::-webkit-scrollbar {
+    height: 3px; /* Высота скроллбара */
+}
+
+.tabs::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Цвет фона скроллбара */
     border-radius: 10px;
-    color: #555;
-    flex-grow: 1; /* Чтобы кнопки занимали равное пространство */
+}
+
+.tabs::-webkit-scrollbar-thumb {
+    background: #888; /* Цвет ползунка скроллбара */
+    border-radius: 10px;
+}
+
+.tabs::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Цвет ползунка при наведении */
+}
+
+.tab-button {
+    flex-shrink: 0; /* Предотвращает сжатие кнопок */
+    padding: 10px 15px;
+    border: none;
+    border-radius: 10px;
+    background-color: #ffae00;
+    color: white;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .tab-button:hover {
-    background-color: rgba(255, 255, 255, 0.7);
-    color: #333;
+    background-color: #0056b3;
+    transform: translateY(-2px);
 }
 
 .tab-button.active {
-    background: linear-gradient(45deg, #4CAF50, #8bc34a); /* Активный градиент */
-    color: #fff;
-    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
-    transform: translateY(-2px); /* Легкий подъем */
+    background-color: #28a745;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+}
+
+body.dark-theme .tabs::-webkit-scrollbar-thumb {
+    background: #6a8ba6;
+}
+
+body.dark-theme .tabs::-webkit-scrollbar-thumb:hover {
+    background: #51718c;
+}
+
+body.dark-theme .tab-button {
+    background-color: #5a7d9a;
+    color: #eee;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .tab-button:hover {
+    background-color: #4a6c87;
+}
+
+body.dark-theme .tab-button.active {
+    background-color: #6edb8c; /* Более яркий активный цвет для темной темы */
+    color: #333;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
 }
 
 /* Контент вкладок */
