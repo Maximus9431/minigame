@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js?57"></script>
 </head>
 <body>
@@ -23,6 +24,8 @@
             <button class="tab-button" onclick="showTab('tab-shop')"><i class="fas fa-store"></i> Shop</button>
             <button class="tab-button" onclick="showTab('tab-pets')"><i class="fas fa-paw"></i> Pets</button>
             <button class="tab-button" onclick="showTab('tab-minigames')"><i class="fas fa-gamepad"></i> Mini-games</button>
+            <button class="tab-button" onclick="showTab('tab-achievements')"><i class="fa-solid fa-trophy"></i> Achievements</button>
+            <button class="tab-button" onclick="showTab('tab-settings')"><i class="fa-solid fa-cog"></i> Rebirth</button>
         </div>
 
         <div class="tab-content" id="tab-game">
@@ -90,7 +93,7 @@
                         <span class="item-price">500</span>
                         <button class="ui-btn buy-btn" onclick="buyPet('dog')"><i class="fas fa-dog"></i> Buy</button>
                     </div>
-                    <div class="pet-item" id="pet-dragon-item">
+                    <div class="pet-item" id="petа-dragon-item">
                         <div class="item-info">
                             <h4>Dragon</h4>
                             <p>Very rare. Increases click strength.</p>
@@ -135,7 +138,16 @@
                     </div>
                     <button class="ui-btn" onclick="startGame('jump')"><i class="fas fa-shoe-prints"></i> Play</button>
                 </div>
-            </div>
+                
+                <div class="game-item">
+                    <div class="item-info">
+                        <h4>Погоня за мышкой</h4>
+                        <p>Быстро кликайте на появляющихся мышей!</p>
+                    </div>
+                    <button class="ui-btn" onclick="startGame('mouseChase')"><i class="fas fa-mouse-pointer"></i> Играть</button>
+                </div>
+                </div>
+
             <div class="mini-games-section" style="margin-top: 25px;">
                 <h3>Records</h3>
                 <h4>Fishing</h4>
@@ -144,6 +156,30 @@
                 <h4>Jumping cat</h4>
                 <ul id="jump-high-scores">
                     </ul>
+                <h4>Погоня за мышкой</h4>
+                <ul id="mouse-chase-high-scores">
+                    <li>Рекорд: <span id="mouse-chase-high-score-display">0</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="tab-achievements" class="tab-content">
+            <h2><i class="fa-solid fa-trophy"></i> Achievements</h2>
+            <div id="achievements-list" class="list-container">
+                <p style="text-align: center; color: #777;">Loading achievements...</p>
+            </div>
+        </div>
+
+        <div id="tab-settings" class="tab-content">
+            <h2><i class="fa-solid fa-star"></i> Rebirth</h2>
+            <div class="settings-section prestige-section">
+                <p>Достигните уровня <span id="prestige-req-level">${PRESTIGE_LEVEL_REQUIREMENT}</span>, чтобы переродиться. Вы потеряете текущий прогресс, но получите очки престижа, которые дадут постоянный множитель к доходу.</p>
+                <p>Ваши очки престижа: <span id="prestige-points">0</span></p>
+                <p>Текущий множитель дохода: x<span id="prestige-multiplier">1.00</span></p>
+                <button id="prestige-button" class="buy-button" onclick="performPrestige()">Переродиться</button>
+                <p class="prestige-info-text">
+                    После перерождения вы начнете игру с 1 уровня, но ваш новый множитель будет применяться ко всем доходам.
+                </p>
             </div>
         </div>
 
@@ -212,6 +248,17 @@
                 </div>
                 <p>Points: <span id="jump-score">0</span></p>
                 <button id="close-jump" class="ui-btn">Close</button>
+            </div>
+        </div>
+
+        <div id="mouse-chase-game" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:1000; background-color: rgba(0, 0, 0, 0.7);">
+            <div class="game-modal">
+                <h2>Погоня за мышкой!</h2>
+                <p>Таймер: <span id="mouse-chase-timer">30</span>с</p>
+                <p>Очки: <span id="mouse-chase-score-display">0</span></p>
+                <div id="mouse-chase-scene">
+                    </div>
+                <button id="close-mouse-chase" class="ui-btn" onclick="endMouseChaseGame()">Закончить игру</button>
             </div>
         </div>
 

@@ -448,6 +448,9 @@ h1 {
     padding-bottom: 15px;
     border-bottom: 1px solid #eee;
     transition: border-color 0.3s ease;
+    justify-content: center; /* Центрируем содержимое */
+    gap: 10px; /* Отступ между элементами */
+    align-items: center; /* Выравнивает элементы по центру по вертикали (если они разной высоты) */
 }
 
 .setting-category:last-child {
@@ -540,22 +543,29 @@ input:checked + .slider:before {
 /* Button Group for Save/Load and Reset */
 .button-group {
     display: flex;
-    flex-wrap: wrap; /* Allow wrapping on smaller screens */
-    justify-content: center;
+    flex-wrap: wrap;
+    justify-content: center; /* Центрирует группу кнопок */
+    gap: 10px; /* Отступ между кнопками */
     margin-top: 10px;
     margin-bottom: 10px;
-    gap: 10px; /* Добавим отступ между кнопками в группе */
 }
 .button-group .ui-btn,
-.setting-category .ui-btn { /* Применяем стили и к одиночным кнопкам в категории */
-    flex: 1 1 auto; /* Allow buttons to grow/shrink */
-    min-width: 180px; /* Set a consistent min-width for all settings buttons */
-    max-width: 220px; /* Optional: Set a max-width if they get too wide */
-    margin: 5px; /* Adjust margin */
-    box-sizing: border-box; /* Ensure padding is included in width */
-    height: 50px; /* Задаем одинаковую высоту */
+.setting-category .ui-btn {
+    width: 200px; /* Задаем фиксированную ширину для всех кнопок */
+    flex-shrink: 0; /* Важно: предотвращает сжатие кнопок */
+    height: 50px; /* Задаем одинаковую высоту, как у вас уже есть */
+    box-sizing: border-box;
+    margin: 0; /* Удаляем margin, так как gap уже обрабатывает отступы */
 }
 
+/* Медиа-запрос для мобильных устройств: кнопки должны растягиваться на всю ширину */
+@media (max-width: 768px) {
+    .button-group .ui-btn,
+    .setting-category .ui-btn {
+        width: 100%; /* На маленьких экранах каждая кнопка занимает всю ширину */
+        margin: 5px 0; /* Возвращаем вертикальный отступ */
+    }
+}
 
 /* Стили для мини-игр */
 #fishing-game, #jump-game {
@@ -864,4 +874,267 @@ input:checked + .slider.round {
 .tab-button {
     padding: 12px 10px; /* Сделаем вертикальный отступ чуть больше для удобства */
     font-size: 0.95em; /* Можно немного скорректировать шрифт, если нужно */
+}
+
+#achievements-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Промежуток между элементами достижений */
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.7); /* Светлый фон */
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    max-height: 500px; /* Ограничиваем высоту */
+    overflow-y: auto; /* Добавляем прокрутку */
+    margin-top: 20px;
+}
+
+/* Стили для отдельного элемента достижения */
+.achievement-item {
+    display: flex;
+    align-items: center;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.achievement-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.achievement-icon {
+    font-size: 2.5em;
+    margin-right: 15px;
+    color: #ccc; /* Цвет по умолчанию для невыполненных */
+}
+
+.achievement-item.completed .achievement-icon {
+    color: #28a745; /* Зеленый для выполненных */
+}
+
+.achievement-details {
+    flex-grow: 1;
+}
+
+.achievement-details h4 {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-size: 1.1em;
+}
+
+.achievement-details p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.achievement-reward {
+    font-weight: bold;
+    color: #f39c12; /* Цвет для награды */
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Промежуток между иконкой и текстом */
+}
+
+.achievement-reward .fas.fa-coins {
+    color: #f1c40f; /* Золотой цвет для иконки монет */
+}
+
+
+/* Стили для темной темы */
+body.dark-theme #achievements-list {
+    background-color: rgba(44, 62, 80, 0.7);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .achievement-item {
+    background-color: #3b526b;
+    border: 1px solid #4a6580;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-theme .achievement-item:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .achievement-icon {
+    color: #666; /* Темнее для невыполненных в темной теме */
+}
+
+body.dark-theme .achievement-item.completed .achievement-icon {
+    color: #2ecc71; /* Светло-зеленый для выполненных в темной теме */
+}
+
+body.dark-theme .achievement-details h4 {
+    color: #eee;
+}
+
+body.dark-theme .achievement-details p {
+    color: #bbb;
+}
+
+body.dark-theme .achievement-reward {
+    color: #f1c40f; /* Желтый для награды в темной теме */
+}
+
+/* Стили для секции престижа */
+.prestige-section {
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.prestige-section h3 {
+    color: #34495e;
+    margin-bottom: 15px;
+    font-size: 1.4em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.prestige-section p {
+    color: #555;
+    margin-bottom: 10px;
+    font-size: 1em;
+}
+
+.prestige-section #prestige-points,
+.prestige-section #prestige-multiplier,
+.prestige-section #prestige-req-level {
+    font-weight: bold;
+    color: #e67e22; /* Оранжевый цвет для важных чисел */
+    font-size: 1.1em;
+}
+
+#prestige-button {
+    background-color: #e67e22; /* Оранжевая кнопка */
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+    margin-top: 15px;
+    width: 80%; /* Ширина кнопки */
+    max-width: 300px;
+}
+
+#prestige-button:hover:not(:disabled) {
+    background-color: #d35400; /* Темнее при наведении */
+    transform: translateY(-2px);
+}
+
+#prestige-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.prestige-info-text {
+    font-size: 0.85em;
+    color: #777;
+    margin-top: 15px;
+}
+
+/* Стили для темной темы */
+body.dark-theme .prestige-section {
+    background-color: rgba(44, 62, 80, 0.7);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .prestige-section h3 {
+    color: #ecf0f1;
+}
+
+body.dark-theme .prestige-section p {
+    color: #bdc3c7;
+}
+
+body.dark-theme .prestige-section #prestige-points,
+body.dark-theme .prestige-section #prestige-multiplier,
+body.dark-theme .prestige-section #prestige-req-level {
+    color: #f1c40f; /* Желтый для важных чисел в темной теме */
+}
+
+body.dark-theme #prestige-button {
+    background-color: #f39c12; /* Желто-оранжевая кнопка */
+}
+
+body.dark-theme #prestige-button:hover:not(:disabled) {
+    background-color: #e67e22;
+}
+
+body.dark-theme #prestige-button:disabled {
+    background-color: #555;
+}
+
+body.dark-theme .prestige-info-text {
+    color: #95a5a6;
+}
+
+/* Стили для игрового модального окна */
+.game-modal {
+    background: linear-gradient(145deg, #e0eafc, #cfdef3); /* Легкий градиент */
+    margin: 20px auto;
+    padding: 25px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    max-width: 90%;
+    width: 500px;
+    position: relative; /* Для позиционирования мышей */
+    height: auto;
+    min-height: 400px; /* Минимальная высота для игровой сцены */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+body.dark-theme .game-modal {
+    background: linear-gradient(145deg, #4a6580, #3b526b);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    color: #eee;
+}
+
+/* Сцена игры "Погоня за мышкой" */
+#mouse-chase-scene {
+    background-color: rgba(255, 255, 255, 0.5); /* Полупрозрачный белый фон */
+    border: 2px dashed #999;
+    border-radius: 10px;
+    height: 300px; /* Высота игровой области */
+    position: relative;
+    overflow: hidden; /* Мыши не должны выходить за границы */
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+body.dark-theme #mouse-chase-scene {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 2px dashed #666;
+}
+
+/* Стили для мыши */
+.mouse {
+    position: absolute;
+    font-size: 3em; /* Размер эмодзи мыши */
+    cursor: pointer;
+    transition: transform 0.1s ease-out; /* Анимация при клике */
+    user-select: none; /* Чтобы текст не выделялся */
+    transform: translate(-50%, -50%); /* Центрирование эмодзи по координатам */
+    line-height: 1; /* Убрать лишний отступ у эмодзи */
+}
+
+.mouse:active {
+    transform: translate(-50%, -50%) scale(0.9); /* Уменьшение при клике */
 }

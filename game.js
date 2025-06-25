@@ -1,5 +1,6 @@
 let coins = 0;
 let clickPower = 1;
+let totalClicks = 0; // Добавлено для достижений
 let autoclickLevel = 0; // Changed to level
 let autoclickIntervalId = null;
 let currentCat = 1;
@@ -33,6 +34,31 @@ let soundEnabled = true;
 let vibrationEnabled = true;
 let criticalClickChance = 0.02; // 2% chance for a critical click
 let criticalClickMultiplier = 3; // Critical clicks give 3x coins
+let achievements = {}; // Объект для хранения всех доступных достижений
+let playerAchievements = {}; // Объект для хранения выполненных игроком достижений: { 'achievementId': true }
+const achievementSound = new Audio('achievement.mp3'); // Создайте этот файл звука!
+
+// Переменные для мини-игры "Погоня за мышкой"
+let mouseChaseActive = false;
+let mouseChaseScore = 0;
+let mouseChaseTimer = 30; // Длительность игры в секундах
+let mouseChaseInterval = null; // Интервал для основного таймера игры
+let mouseSpawnInterval = null; // Интервал для спавна мышей
+let mousesOnScreen = []; // Массив для отслеживания текущих мышей
+let mouseChaseHighScore = 0; // Рекорд
+const MOUSE_SPEED_MIN = 1; // Минимальная скорость движения мыши (px за тик)
+const MOUSE_SPEED_MAX = 3; // Максимальная скорость
+const MOUSE_DESPAWN_TIME = 2000; // Через сколько мс мышь исчезнет, если ее не кликнули
+const MOUSE_TICK_RATE = 20; // Как часто обновляется положение мыши (мс)
+const MOUSE_SPAWN_RATE = 1000; // Как часто спавнятся мыши (мс)
+const mouseClickSound = new Audio('mouse_click.mp3'); // Создайте этот файл звука!
+const gameEndSound = new Audio('game_end.mp3'); // Создайте этот файл звука!
+
+let prestigePoints = 0; // Новая валюта: очки престижа
+let prestigeMultiplier = 1; // Множитель дохода от престижа (1% за каждое очко престижа)
+const PRESTIGE_LEVEL_REQUIREMENT = 100; // Требуемый уровень для престижа
+const PRESTIGE_POINTS_PER_LEVEL = 1; // Сколько очков престижа дается за каждые 10 уровней выше требования
+const prestigeSound = new Audio('prestige.mp3'); // Создайте этот файл звука!
 
 // Local High Scores for Mini-games
 let fishingHighScores = [];
@@ -50,7 +76,7 @@ const criticalSound = new Audio('critical_hit.mp3'); // New sound for critical c
 function handleCatClick(event) {
     if (jumpGameActive || fishingGameActive) return;
 
-    let earnedCoins = clickPower;
+    let earnedCoins = clickPower * (1 + (level * 0.01)) * prestigeMultiplier; // Применяем множитель престижа
     let isCritical = false;
 
     if (Math.random() < criticalClickChance) {
@@ -92,6 +118,7 @@ function handleCatClick(event) {
 
     coins += earnedCoins;
     xp += xpPerClick;
+    totalClicks++; // Увеличиваем счетчик кликов
 
     updateUI();
     playClickSound();
@@ -136,16 +163,19 @@ function handleCatClick(event) {
     } else {
         comboDisplay.style.opacity = 0; // Hide combo display initially if not in combo
     }
+
+    checkAchievements('click'); // Вызываем проверку достижений после клика
+
 }
 
 function gameTick() {
     // Autoclick income based on its level
     if (autoclickLevel > 0) {
-        coins += autoclickLevel; // Each level gives 1 coin/sec
+        coins += autoclickLevel * prestigeMultiplier;; // Each level gives 1 coin/sec
     }
 
     // Passive income based on its level
-    coins += passiveIncome;
+    coins += passiveIncome * prestigeMultiplier;;
     updateUI();
     spawnRareEvent(); // Spawns rare events periodically
 }
@@ -182,8 +212,27 @@ function updateUI() {
     document.getElementById('passive-price').textContent = calculateUpgradeCost('passive');
     document.getElementById('passive-level-display').textContent = `(Ур. ${passiveUpgradeCount})`;
     
+    // Обновление UI престижа
+    document.getElementById('prestige-points').textContent = prestigePoints;
+    document.getElementById('prestige-multiplier').textContent = prestigeMultiplier.toFixed(2);
+    document.getElementById('prestige-req-level').textContent = PRESTIGE_LEVEL_REQUIREMENT;
+
+    const prestigeButton = document.getElementById('prestige-button');
+    if (prestigeButton) { // Проверяем, что кнопка существует
+        if (level >= PRESTIGE_LEVEL_REQUIREMENT) {
+            prestigeButton.disabled = false;
+            prestigeButton.textContent = `Переродиться (получить ${Math.floor((level - PRESTIGE_LEVEL_REQUIREMENT) / 10) + 1} очков)`;
+            prestigeButton.classList.remove('disabled');
+        } else {
+            prestigeButton.disabled = true;
+            prestigeButton.textContent = `Переродиться (нужен ${PRESTIGE_LEVEL_REQUIREMENT} ур.)`;
+            prestigeButton.classList.add('disabled');
+        }
+    }
+
     updatePetsUI();
     updateMiniGameHighScoresUI(); // Update mini-game high scores
+    updateAchievementsUI(); // Добавлено
 }
 
 function levelUp() {
@@ -194,6 +243,7 @@ function levelUp() {
     playLevelUpSound();
     vibrate(100);
     updateUI();
+    checkAchievements('levelUp'); // Добавлено
 }
 
 function showTab(tabId) {
@@ -302,6 +352,7 @@ function buyPet(petType) {
         vibrate(100);
         updateUI();
         saveGame();
+        checkAchievements('petPurchase'); // Добавлено
     } else {
         showNotification('Недостаточно монет для покупки питомца!', 'error');
     }
@@ -396,6 +447,48 @@ function updatePetsUI() {
     }
 }
 
+function updateAchievementsUI() {
+    const achievementsListDiv = document.getElementById('achievements-list');
+    achievementsListDiv.innerHTML = ''; // Очищаем список перед обновлением
+
+    // Сортируем достижения: сначала выполненные, затем невыполненные
+    const sortedAchievementIds = Object.keys(achievements).sort((aId1, aId2) => {
+        const completed1 = playerAchievements[aId1] ? 1 : 0;
+        const completed2 = playerAchievements[aId2] ? 1 : 0;
+        return completed2 - completed1; // Сортируем так, чтобы выполненные были выше
+    });
+
+    if (Object.keys(achievements).length === 0) {
+        achievementsListDiv.innerHTML = '<p style="text-align: center; color: #777;">Достижения не определены.</p>';
+        return;
+    }
+
+    sortedAchievementIds.forEach(id => {
+        const ach = achievements[id];
+        const isCompleted = playerAchievements[id];
+
+        const achievementDiv = document.createElement('div');
+        achievementDiv.classList.add('achievement-item');
+        if (isCompleted) {
+            achievementDiv.classList.add('completed');
+        }
+
+        achievementDiv.innerHTML = `
+            <div class="achievement-icon">
+                <i class="${isCompleted ? 'fa-solid fa-check-circle' : 'fa-solid fa-circle'}"></i>
+            </div>
+            <div class="achievement-details">
+                <h4>${ach.name}</h4>
+                <p>${ach.description}</p>
+                <p class="achievement-reward">
+                    Reward: ${ach.reward.coins || 0} <i class="fas fa-coins"></i>, ${ach.reward.xp || 0} XP
+                </p>
+            </div>
+        `;
+        achievementsListDiv.appendChild(achievementDiv);
+    });
+}
+
 function getPetBonusDescription(petType, level) {
     switch(petType) {
         case 'dog':
@@ -460,6 +553,135 @@ function checkDailyReward() {
         saveGame();
         updateUI();
     };
+}
+
+function initializeAchievements() {
+    const allAchievements = [
+        {
+            id: 'first_click',
+            name: 'First click',
+            description: 'Make your first click.',
+            reward: { coins: 10, xp: 5 },
+            check: () => true // Это достижение всегда будет выполнено после первого клика
+        },
+        {
+            id: 'total_clicks_100',
+            name: 'Pusher',
+            description: 'Click on the cat 100 times.',
+            reward: { coins: 100, xp: 20 },
+            check: () => totalClicks >= 100 // Понадобится новая переменная totalClicks
+        },
+        {
+            id: 'level_10',
+            name: 'Beginner',
+            description: 'Reach level 10.',
+            reward: { coins: 200, xp: 50 },
+            check: () => level >= 10
+        },
+        {
+            id: 'buy_dog',
+            name: 'Best friend',
+            description: 'Buy a dog.',
+            reward: { coins: 150, xp: 30 },
+            check: () => petLevels['dog'] !== undefined && petLevels['dog'] > 0
+        },
+        {
+            id: 'fishing_master_50',
+            name: 'Fish magnate',
+            description: 'Score 50 points in the mini-game "Fishing".',
+            reward: { coins: 300, xp: 60 },
+            check: () => fishingHighScores.some(score => score >= 50)
+        },
+        {
+            id: 'jump_hero_20',
+            name: 'Jumper',
+            description: 'Score 20 points in the mini-game "Cat Jumping".',
+            reward: { coins: 300, xp: 60 },
+            check: () => jumpHighScores.some(score => score >= 20)
+        },
+        // Добавьте больше достижений здесь
+        {
+            id: 'total_clicks_1000',
+            name: 'Clicker-Profi',
+            description: 'Click on the cat 1000 times.',
+            reward: { coins: 500, xp: 100 },
+            check: () => totalClicks >= 1000
+        },
+        {
+            id: 'level_50',
+            name: 'Experienced player',
+            description: 'Reach level 50.',
+            reward: { coins: 1000, xp: 200 },
+            check: () => level >= 50
+        },
+        {
+            id: 'buy_all_pets',
+            name: 'Pet Collector',
+            description: 'Buy all available pets.',
+            reward: { coins: 2000, xp: 500 },
+            check: () => Object.keys(petLevels).length === 4 // Исходит из того, что всего 4 питомца: dog, dragon, phoenix, unicorn
+        }
+    ];
+
+    allAchievements.forEach(ach => {
+        achievements[ach.id] = ach;
+    });
+}
+
+function checkAchievements(type, data = null) {
+    for (const id in achievements) {
+        if (!playerAchievements[id]) { // Если достижение еще не выполнено
+            const achievement = achievements[id];
+            let isCompleted = false;
+
+            // Проверка достижения в зависимости от его типа или данных события
+            switch(id) {
+                case 'first_click':
+                case 'total_clicks_100':
+                case 'total_clicks_1000':
+                    if (type === 'click' && achievement.check()) {
+                        isCompleted = true;
+                    }
+                    break;
+                case 'level_10':
+                case 'level_50':
+                    if (type === 'levelUp' && achievement.check()) {
+                        isCompleted = true;
+                    }
+                    break;
+                case 'buy_dog':
+                case 'buy_all_pets':
+                    if (type === 'petPurchase' && achievement.check()) {
+                        isCompleted = true;
+                    }
+                    break;
+                case 'fishing_master_50':
+                    if (type === 'fishingGameEnd' && achievement.check()) {
+                        isCompleted = true;
+                    }
+                    break;
+                case 'jump_hero_20':
+                    if (type === 'jumpGameEnd' && achievement.check()) {
+                        isCompleted = true;
+                    }
+                    break;
+                // Добавьте сюда другие проверки для новых достижений
+            }
+
+            if (isCompleted) {
+                playerAchievements[id] = true;
+                coins += achievement.reward.coins || 0;
+                xp += achievement.reward.xp || 0;
+                showNotification(`Достижение выполнено: "${achievement.name}"!`, 'success');
+                playAchievementSound();
+                vibrate(200);
+                saveGame();
+                updateUI();
+                updateAchievementsUI();
+            }
+        }
+    }
+
 }
 
 // --- Система редких событий ---
@@ -533,7 +755,10 @@ function startGame(gameType) {
         document.getElementById('jump-game').style.display = 'flex';
         jumpGameActive = true;
         startJumpGame();
-    }
+    } else if (gameType === 'mouseChase') {
+        document.getElementById('mouse-chase-game').style.display = 'flex';
+        startMouseChaseGame();
+    } 
 }
 
 // Рыбалка
@@ -634,6 +859,7 @@ function endFishingGame() {
     localStorage.removeItem('goldenFishBonus'); // Remove bonus after game
     updateUI();
     saveGame();
+    checkAchievements('fishingGameEnd'); // Добавлено
 }
 
 document.getElementById('close-fishing').addEventListener('click', () => {
@@ -642,6 +868,181 @@ document.getElementById('close-fishing').addEventListener('click', () => {
     endFishingGame();
 });
 
+// Погони за мышкой
+function startMouseChaseGame() {
+    if (mouseChaseActive) return;
+
+    mouseChaseActive = true;
+    mouseChaseScore = 0;
+    mouseChaseTimer = 30; // Сброс таймера
+    mousesOnScreen = []; // Очистка мышей
+    
+    // Скрываем все вкладки и показываем игровую область "Погони за мышкой"
+    document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+    document.getElementById('mouse-chase-game').style.display = 'block';
+    
+    document.getElementById('mouse-chase-score-display').textContent = mouseChaseScore;
+    document.getElementById('mouse-chase-timer').textContent = mouseChaseTimer;
+
+    // Очищаем игровое поле от старых мышей (если остались)
+    const gameArea = document.getElementById('mouse-chase-scene');
+    gameArea.innerHTML = ''; 
+
+    mouseChaseInterval = setInterval(() => {
+        mouseChaseTimer--;
+        document.getElementById('mouse-chase-timer').textContent = mouseChaseTimer;
+        if (mouseChaseTimer <= 0) {
+            endMouseChaseGame();
+        }
+    }, 1000); // Таймер игры уменьшается каждую секунду
+
+    mouseSpawnInterval = setInterval(spawnMouse, MOUSE_SPAWN_RATE); // Спавн мышей
+
+    showNotification('Игра "Погоня за мышкой" началась!', 'info');
+    vibrate(100);
+}
+
+function spawnMouse() {
+    const gameArea = document.getElementById('mouse-chase-scene');
+    const gameAreaRect = gameArea.getBoundingClientRect();
+
+    const mouseSize = 40; // Размер мыши
+    const maxX = gameAreaRect.width - mouseSize;
+    const maxY = gameAreaRect.height - mouseSize;
+
+    if (maxX <= 0 || maxY <= 0) { // Проверка, что область игры видима и имеет размеры
+        console.warn("Mouse chase game area is too small or not visible to spawn mice.");
+        return;
+    }
+
+    const mouse = document.createElement('div');
+    mouse.classList.add('mouse');
+    mouse.textContent = '🐭'; // Эмодзи мыши
+
+    // Случайные начальные позиции
+    let startX = Math.random() * maxX;
+    let startY = Math.random() * maxY;
+    mouse.style.left = `${startX}px`;
+    mouse.style.top = `${startY}px`;
+
+    // Случайная скорость и направление
+    const speed = MOUSE_SPEED_MIN + Math.random() * (MOUSE_SPEED_MAX - MOUSE_SPEED_MIN);
+    const angle = Math.random() * 2 * Math.PI; // Случайный угол движения
+    const dx = Math.cos(angle) * speed;
+    const dy = Math.sin(angle) * speed;
+
+    mouse.dataset.dx = dx;
+    mouse.dataset.dy = dy;
+    mouse.dataset.value = Math.floor(Math.random() * 5) + 1; // Мыши дают 1-5 очков
+
+    // Движение мыши
+    let mouseMoveInterval = setInterval(() => {
+        let currentX = parseFloat(mouse.style.left);
+        let currentY = parseFloat(mouse.style.top);
+
+        currentX += parseFloat(mouse.dataset.dx);
+        currentY += parseFloat(mouse.dataset.dy);
+
+        // Отскок от границ
+        if (currentX < 0 || currentX > maxX) {
+            mouse.dataset.dx = -parseFloat(mouse.dataset.dx);
+        }
+        if (currentY < 0 || currentY > maxY) {
+            mouse.dataset.dy = -parseFloat(mouse.dataset.dy);
+        }
+
+        mouse.style.left = `${Math.max(0, Math.min(maxX, currentX))}px`;
+        mouse.style.top = `${Math.max(0, Math.min(maxY, currentY))}px`;
+    }, MOUSE_TICK_RATE);
+
+    // Удаление мыши через некоторое время, если не кликнули
+    let despawnTimeout = setTimeout(() => {
+        if (mouse.parentNode === gameArea) { // Проверяем, что мышь еще на поле
+            gameArea.removeChild(mouse);
+            mousesOnScreen = mousesOnScreen.filter(m => m.element !== mouse);
+        }
+        clearInterval(mouseMoveInterval);
+    }, MOUSE_DESPAWN_TIME);
+
+    mouse.addEventListener('click', () => {
+        if (!mouseChaseActive) return;
+        playMouseClickSound();
+        vibrate(30);
+
+        const value = parseInt(mouse.dataset.value);
+        mouseChaseScore += value;
+        coins += value * 2; // Например, 1 мышь = 2 монеты
+        xp += value; // И немного XP
+
+        document.getElementById('mouse-chase-score-display').textContent = mouseChaseScore;
+        updateUI(); // Обновление счетчика монет/XP
+
+        // Удаление мыши при клике
+        gameArea.removeChild(mouse);
+        mousesOnScreen = mousesOnScreen.filter(m => m.element !== mouse);
+        clearTimeout(despawnTimeout); // Отменяем таймер исчезновения
+        clearInterval(mouseMoveInterval); // Останавливаем движение
+    });
+
+    gameArea.appendChild(mouse);
+    mousesOnScreen.push({ element: mouse, moveInterval: mouseMoveInterval, despawnTimeout: despawnTimeout });
+}
+
+function playMouseClickSound() {
+    if (soundEnabled) {
+        mouseClickSound.currentTime = 0;
+        mouseClickSound.play().catch(e => console.error("Error playing mouse click sound:", e));
+    }
+}
+
+function endMouseChaseGame() {
+    if (!mouseChaseActive) return;
+
+    mouseChaseActive = false;
+    clearInterval(mouseChaseInterval);
+    clearInterval(mouseSpawnInterval);
+    playGameEndSound(); // Воспроизвести звук завершения игры
+    vibrate(150);
+
+    // Очищаем все оставшиеся мыши и их интервалы
+    const gameArea = document.getElementById('mouse-chase-scene');
+    mousesOnScreen.forEach(mouseData => {
+        clearInterval(mouseData.moveInterval);
+        clearTimeout(mouseData.despawnTimeout);
+        if (mouseData.element.parentNode === gameArea) {
+            gameArea.removeChild(mouseData.element);
+        }
+    });
+    mousesOnScreen = [];
+
+    let coinsEarned = mouseChaseScore * 2; // Общий заработок монет
+    let xpEarned = mouseChaseScore; // Общий заработок XP
+
+    if (mouseChaseScore > mouseChaseHighScore) {
+        mouseChaseHighScore = mouseChaseScore;
+        showNotification(`Новый рекорд в "Погоне за мышкой": ${mouseChaseHighScore} очков!`, 'gold');
+    } else {
+        showNotification(`Игра окончена! Вы набрали ${mouseChaseScore} очков.`, 'info');
+    }
+    showNotification(`Вы заработали ${coinsEarned} монет и ${xpEarned} XP!`, 'success');
+
+    coins += coinsEarned;
+    xp += xpEarned;
+    saveGame();
+    updateUI();
+
+    // Возвращаемся к вкладке мини-игр
+    document.getElementById('mouse-chase-game').style.display = 'none';
+    showTab('tab-minigames');
+    updateMiniGameHighScoresUI(); // Обновить рекорды
+}
+
+function playGameEndSound() {
+    if (soundEnabled) {
+        gameEndSound.currentTime = 0;
+        gameEndSound.play().catch(e => console.error("Error playing game end sound:", e));
+    }
+}
 
 // Прыжки с котом
 function startJumpGame() {
@@ -734,6 +1135,7 @@ function endJumpGame() {
     jumpHighScores = jumpHighScores.slice(0, 5);
     updateUI();
     saveGame();
+    checkAchievements('jumpGameEnd'); // Добавлено
 }
 
 document.getElementById('close-jump').addEventListener('click', () => {
@@ -765,6 +1167,11 @@ function updateMiniGameHighScoresUI() {
             jumpScoresList.appendChild(li);
         });
     }
+
+    const mouseChaseHighScoreElement = document.getElementById('mouse-chase-high-score-display');
+    if (mouseChaseHighScoreElement) {
+        mouseChaseHighScoreElement.textContent = mouseChaseHighScore;
+    }
 }
 
 // --- Сохранение и загрузка игры ---
@@ -789,7 +1196,12 @@ function saveGame() {
         jumpHighScores,
         criticalClickChance, // Save critical click chance
         criticalClickMultiplier,
-        currentTheme // Save theme preference
+        currentTheme, // Save theme preference
+        totalClicks, // Добавлено
+        playerAchievements, // Добавлено
+        prestigePoints, // Добавлено
+        prestigeMultiplier, // Добавлено
+        mouseChaseHighScore // Добавлено
     };
     localStorage.setItem('catClickerGame', JSON.stringify(gameData));
     showNotification('The game is saved!', 'info');
@@ -821,6 +1233,11 @@ function loadGame() {
         criticalClickChance = gameData.criticalClickChance !== undefined ? gameData.criticalClickChance : 0.02;
         criticalClickMultiplier = gameData.criticalClickMultiplier !== undefined ? gameData.criticalClickMultiplier : 3;
         currentTheme = gameData.currentTheme || 'light'; // Load theme
+        totalClicks = gameData.totalClicks || 0; // Добавлено
+        playerAchievements = gameData.playerAchievements || {}; // Добавлено
+        prestigePoints = gameData.prestigePoints || 0; // Добавлено
+        prestigeMultiplier = gameData.prestigeMultiplier || 1; // Добавлено
+        mouseChaseHighScore = gameData.mouseChaseHighScore || 0; // Добавлено
 
         document.getElementById('sound-toggle').checked = soundEnabled;
         document.getElementById('vibration-toggle').checked = vibrationEnabled;
@@ -875,6 +1292,50 @@ function resetGame() {
     showNotification('Игра сброшена!', 'error');
     updateUI();
     saveGame();
+}
+
+function performPrestige() {
+    if (level < PRESTIGE_LEVEL_REQUIREMENT) {
+        showNotification(`Вам нужно достичь ${PRESTIGE_LEVEL_REQUIREMENT} уровня, чтобы переродиться.`, 'error');
+        return;
+    }
+
+    if (!confirm(`Вы уверены, что хотите переродиться? Вы потеряете все монеты, XP, уровни, улучшения и питомцев, но получите очки престижа, которые дадут постоянный множитель к доходу.`)) {
+        return;
+    }
+
+    // Рассчитываем очки престижа
+    const earnedPrestigePoints = Math.floor((level - PRESTIGE_LEVEL_REQUIREMENT) / 10) + 1; // Минимум 1 очко за первый престиж
+    prestigePoints += earnedPrestigePoints;
+    prestigeMultiplier = 1 + (prestigePoints * 0.01); // Каждое очко престижа дает +1% к множителю
+
+    // Сброс прогресса
+    coins = 0;
+    clickPower = 1;
+    autoclickLevel = 0;
+    xp = 0;
+    level = 1;
+    passiveIncome = 0;
+    passiveUpgradeCount = 0;
+    petLevels = {}; // Сброс питомцев
+    upgradeLevel = 1;
+    totalClicks = 0; // Сброс счетчика кликов для достижений
+    // playerAchievements = {}; // Опционально: сбросить достижения. Я рекомендую НЕ сбрасывать достижения.
+
+    showNotification(`Вы переродились и получили ${earnedPrestigePoints} очков престижа! Ваш множитель дохода теперь x${prestigeMultiplier.toFixed(2)}.`, 'success');
+    playPrestigeSound(); // Воспроизвести звук престижа
+    vibrate(300); // Долгая вибрация
+    saveGame();
+    updateUI();
+    // Закрываем все открытые вкладки и возвращаемся на главную
+    showTab('tab-game');
+}
+
+function playPrestigeSound() {
+    if (soundEnabled) {
+        prestigeSound.currentTime = 0;
+        prestigeSound.play().catch(e => console.error("Error playing prestige sound:", e));
+    }
 }
 
 function resetPetsConfirmation() {
@@ -944,6 +1405,7 @@ function vibrate(duration) {
 
 document.addEventListener('DOMContentLoaded', () => {
     loadGame();
+    initializeAchievements(); // Добавлено
 
     // ========= НАЧАЛО ВСТАВКИ =========
     try {
