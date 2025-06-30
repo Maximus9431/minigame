@@ -1187,3 +1187,198 @@ body.dark-theme #mouse-chase-scene {
 .mouse:active {
     transform: translate(-50%, -50%) scale(0.9); /* Уменьшение при клике */
 }
+
+/* New Styles for Cat Coin Container and Animation */
+#cat-coin-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 24px 0;
+}
+
+/* 3D монетка */
+.cat-coin {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at 60% 40%, #ffe082 70%, #ffb300 100%);
+    box-shadow:
+        0 8px 32px #ffecb366,
+        0 2px 12px #ffb30099,
+        inset 0 12px 36px #fff8e1cc,
+        inset 0 -12px 36px #ffb30044;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    transition: box-shadow 0.2s, transform 0.2s;
+    perspective: 400px;
+    border: 4px solid #ffd54f;
+    overflow: visible;
+}
+
+/* Блик сверху */
+.cat-coin::before {
+    content: "";
+    position: absolute;
+    top: 18px;
+    left: 32px;
+    width: 60px;
+    height: 32px;
+    background: radial-gradient(ellipse at center, #fff9 60%, #fff0 100%);
+    border-radius: 50%;
+    opacity: 0.7;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Тень снизу */
+.cat-coin::after {
+    content: "";
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 24px;
+    background: radial-gradient(ellipse at center, #ffb30055 60%, #fff0 100%);
+    border-radius: 50%;
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Котик на монетке */
+.cat-coin img#cat-img {
+    width: 96px;
+    height: 96px;
+    object-fit: contain;
+    z-index: 3;
+    filter: drop-shadow(0 2px 8px #ffb30033);
+    user-select: none;
+    pointer-events: auto;
+    transition: transform 0.1s;
+}
+
+/* Эффект нажатия */
+.cat-coin:active {
+    transform: scale(0.96) rotateX(8deg) rotateY(-8deg);
+    box-shadow:
+        0 4px 16px #ffecb366,
+        0 1px 6px #ffb30099,
+        inset 0 6px 18px #fff8e1cc,
+        inset 0 -6px 18px #ffb30044;
+}
+
+/* Вращение по наведению */
+.cat-coin:hover {
+    animation: coin-spin 1.2s cubic-bezier(0.4,1.6,0.4,1) forwards;
+}
+
+@keyframes coin-spin {
+    0% { transform: rotateY(0deg) scale(1); }
+    40% { transform: rotateY(180deg) scale(1.08); }
+    60% { transform: rotateY(200deg) scale(1.08); }
+    100% { transform: rotateY(360deg) scale(1); }
+}
+
+/* Сияние монетки */
+.cat-coin {
+    animation: coin-glow 2.5s infinite alternate;
+}
+
+@keyframes coin-glow {
+    0% {
+        box-shadow:
+            0 8px 32px #ffecb366,
+            0 2px 12px #ffb30099,
+            0 0 0 0 #ffe08288,
+            inset 0 12px 36px #fff8e1cc,
+            inset 0 -12px 36px #ffb30044;
+    }
+    100% {
+        box-shadow:
+            0 12px 48px #ffecb399,
+            0 4px 24px #ffb300cc,
+            0 0 32px 8px #ffe082cc,
+            inset 0 18px 54px #fff8e1ee,
+            inset 0 -18px 54px #ffb30066;
+    }
+}
+
+/* New styles for fishing mini-game */
+#fishing-3d-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+#fishing-water {
+    position: relative;
+    background: linear-gradient(to bottom, #4fc3f7 0%, #01579b 100%);
+    border-radius: 24px;
+    box-shadow: 0 8px 32px #01579b66, 0 2px 12px #4fc3f799;
+    padding: 24px 24px 12px 24px;
+}
+#fishing-canvas {
+    display: block;
+    background: linear-gradient(to bottom, #b3e5fc 0%, #0288d1 100%);
+    border-radius: 18px;
+    box-shadow: 0 4px 16px #0288d1aa inset;
+}
+#fishing-ui {
+    margin-top: 12px;
+    color: #fff;
+    font-size: 1.2em;
+    text-shadow: 0 2px 8px #01579b88;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#jump-3d-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+#jump-canvas {
+    background: linear-gradient(to top, #cfd8dc 0%, #90caf9 100%);
+    border-radius: 18px;
+    box-shadow: 0 4px 32px #1976d2aa, 0 2px 12px #90caf9cc;
+    margin-bottom: 12px;
+}
+#jump-ui {
+    color: #333;
+    font-size: 1.2em;
+    text-shadow: 0 2px 8px #fff8;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* 3D контейнер и канвас для mouse chase */
+#mouse-chase-3d-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+#mouse-chase-canvas {
+    background: linear-gradient(to bottom, #f5f5f5 0%, #bdbdbd 100%);
+    border-radius: 18px;
+    box-shadow: 0 4px 32px #61616155, 0 2px 12px #bdbdbdcc;
+    margin-bottom: 12px;
+}
+#mouse-chase-ui {
+    color: #333;
+    font-size: 1.2em;
+    text-shadow: 0 2px 8px #fff8;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}

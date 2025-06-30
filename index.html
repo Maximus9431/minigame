@@ -25,13 +25,17 @@
             <button class="tab-button" onclick="showTab('tab-pets')"><i class="fas fa-paw"></i> Pets</button>
             <button class="tab-button" onclick="showTab('tab-minigames')"><i class="fas fa-gamepad"></i> Mini-games</button>
             <button class="tab-button" onclick="showTab('tab-achievements')"><i class="fa-solid fa-trophy"></i> Achievements</button>
-            <button class="tab-button" onclick="showTab('tab-settings')"><i class="fa-solid fa-cog"></i> Rebirth</button>
+            <button class="tab-button" onclick="showTab('tab-rebirth')"><i class="fa-solid fa-star"></i> Rebirth</button>
         </div>
 
         <div class="tab-content" id="tab-game">
             <div id="cat-area">
-                <img id="cat-img" src="cat1.png" alt="Котик" />
-                <div id="combo-display"></div>
+              <div id="cat-coin-container">
+                <div class="cat-coin">
+                  <img id="cat-img" src="cat1.png" alt="Cat" />
+                </div>
+              </div>
+              <div id="combo-display" style="opacity:0; transition:opacity 0.3s; text-align:center; font-weight:bold; color:#ff9800; font-size:1.2em; margin-top:8px;"></div>
             </div>
             <div class="game-stats">
                 <p>Coins: <span id="coins">0</span></p>
@@ -98,7 +102,7 @@
                             <h4>Dragon</h4>
                             <p>Very rare. Increases click strength.</p>
                         </div>
-                        <span class="item-price">5000</span>
+                        <span class="item-price">5 000</span>
                         <button class="ui-btn buy-btn" onclick="buyPet('dragon')"><i class="fas fa-dragon"></i> Buy</button>
                     </div>
                     <div class="pet-item" id="pet-phoenix-item">
@@ -106,7 +110,7 @@
                             <h4>Phoenix</h4>
                             <p>Very rare. Gives a bonus to XP.</p>
                         </div>
-                        <span class="item-price">7500</span>
+                        <span class="item-price">7 500</span>
                         <button class="ui-btn buy-btn" onclick="buyPet('phoenix')"><i class="fas fa-fire"></i> Buy</button>
                     </div>
                      <div class="pet-item" id="pet-unicorn-item">
@@ -114,7 +118,7 @@
                             <h4>Unicorn</h4>
                             <p>Very rare. Increases the chance of rare events (critical clicks).</p>
                         </div>
-                        <span class="item-price">10000</span>
+                        <span class="item-price">10 000</span>
                         <button class="ui-btn buy-btn" onclick="buyPet('unicorn')"><i class="fa-solid fa-unicorn"></i> Buy</button>
                     </div>
                 </div>
@@ -141,10 +145,10 @@
                 
                 <div class="game-item">
                     <div class="item-info">
-                        <h4>Погоня за мышкой</h4>
-                        <p>Быстро кликайте на появляющихся мышей!</p>
+                        <h4>Chasing the mouse</h4>
+                        <p>Quickly click on the mice that appear!</p>
                     </div>
-                    <button class="ui-btn" onclick="startGame('mouseChase')"><i class="fas fa-mouse-pointer"></i> Играть</button>
+                    <button class="ui-btn" onclick="startGame('mouseChase')"><i class="fas fa-mouse-pointer"></i> Play</button>
                 </div>
                 </div>
 
@@ -156,21 +160,21 @@
                 <h4>Jumping cat</h4>
                 <ul id="jump-high-scores">
                     </ul>
-                <h4>Погоня за мышкой</h4>
+                <h4>Chasing the mouse</h4>
                 <ul id="mouse-chase-high-scores">
-                    <li>Рекорд: <span id="mouse-chase-high-score-display">0</span></li>
+                    <li>Record: <span id="mouse-chase-high-score-display">0</span></li>
                 </ul>
             </div>
         </div>
 
-        <div id="tab-achievements" class="tab-content">
+        <div class="tab-content" id="tab-achievements" style="display: none;">
             <h2><i class="fa-solid fa-trophy"></i> Achievements</h2>
             <div id="achievements-list" class="list-container">
                 <p style="text-align: center; color: #777;">Loading achievements...</p>
             </div>
         </div>
 
-        <div id="tab-settings" class="tab-content">
+        <div class="tab-content" id="tab-rebirth" style="display: none;">
             <h2><i class="fa-solid fa-star"></i> Rebirth</h2>
             <div class="settings-section prestige-section">
                 <p>Достигните уровня <span id="prestige-req-level">${PRESTIGE_LEVEL_REQUIREMENT}</span>, чтобы переродиться. Вы потеряете текущий прогресс, но получите очки престижа, которые дадут постоянный множитель к доходу.</p>
@@ -218,48 +222,48 @@
                         <button id="save-btn" class="ui-btn"><i class="fas fa-save"></i> Save game</button>
                         <button id="load-btn" class="ui-btn"><i class="fas fa-upload"></i> Load game</button>
                     </div>
-                    <button id="reset-pets-btn" class="ui-btn danger-btn" onclick="resetPetsConfirmation()"><i class="fas fa-paw"></i> Reset pets</button>
-                    <button id="reset-btn" class="ui-btn danger-btn" onclick="resetGameConfirmation()"><i class="fas fa-redo"></i> Reset game</button>
+                    <div class="button-group" style="margin-top:12px;">
+                        <button id="reset-pets-btn" class="ui-btn danger-btn"><i class="fas fa-paw"></i> Reset pets</button>
+                        <button id="reset-btn" class="ui-btn danger-btn"><i class="fas fa-redo"></i> Reset game</button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div id="notification-container"></div>
         
-        <div id="fishing-game" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:1000;">
-            <div style="background:#fff; margin:20px; padding:20px; border-radius:15px; text-align:center;">
-                <h2>Cat Fishing!</h2>
-                <p>Click on the fish to catch them!</p>
-                <div id="fishing-scene" style="height:250px; position:relative; background: linear-gradient(to bottom, #87CEEB, #4682B4); border: 2px solid #333; border-radius: 10px; overflow: hidden;">
-                    </div>
-                <p>Time left: <span id="fishing-timer">30</span>с</p>
-                <p>Points: <span id="fishing-score-display">0</span></p>
-                <button id="close-fishing" class="ui-btn">Close</button>
-            </div>
-        </div>     
+        <div id="fishing-game" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:1000; background:rgba(0,0,0,0.7);">
+  <div id="fishing-3d-container">
+    <div id="fishing-water">
+      <canvas id="fishing-canvas" width="600" height="350"></canvas>
+      <div id="fishing-ui">
+        <span>🎣 <b>Score:</b> <span id="fishing-score-display">0</span></span>
+        <span style="margin-left:20px;"><b>Time:</b> <span id="fishing-timer">30</span>s</span>
+        <button id="close-fishing" class="ui-btn" style="float:right;">Exit</button>
+      </div>
+    </div>
+  </div>
+</div>     
 
-        <div id="jump-game" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:1000;">
-            <div style="background:#fff; margin:20px; padding:20px; border-radius:15px; text-align:center;">
-                <h2>Cat Jump!</h2>
-                <p>Click to make the cat jump!</p>
-                <div id="jump-scene" style="height:200px; position:relative; background: linear-gradient(to top, #c7e9fb, #a7d9f7); border-bottom:2px solid #555; overflow:hidden;">
-                    <div id="cat-jumper" style="position:absolute; bottom:0; left:50px; font-size:40px;">🐱</div>
-                    <div id="jump-obstacle" style="position:absolute; bottom:0; right:-30px; width:30px; height:40px; background:#f00;"></div>
-                </div>
-                <p>Points: <span id="jump-score">0</span></p>
-                <button id="close-jump" class="ui-btn">Close</button>
+        <div id="jump-game" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:1000; background:rgba(0,0,0,0.7);">
+        <div id="jump-3d-container">
+            <canvas id="jump-canvas" width="600" height="350"></canvas>
+            <div id="jump-ui">
+            <span>🐱 <b>Score:</b> <span id="jump-score">0</span></span>
+            <button id="close-jump" class="ui-btn" style="float:right;">Exit</button>
             </div>
         </div>
+        </div>
 
-        <div id="mouse-chase-game" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:1000; background-color: rgba(0, 0, 0, 0.7);">
-            <div class="game-modal">
-                <h2>Погоня за мышкой!</h2>
-                <p>Таймер: <span id="mouse-chase-timer">30</span>с</p>
-                <p>Очки: <span id="mouse-chase-score-display">0</span></p>
-                <div id="mouse-chase-scene">
-                    </div>
-                <button id="close-mouse-chase" class="ui-btn" onclick="endMouseChaseGame()">Закончить игру</button>
+        <div id="mouse-chase-game" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:1000; background:rgba(0,0,0,0.7);">
+        <div id="mouse-chase-3d-container">
+            <canvas id="mouse-chase-canvas" width="600" height="350"></canvas>
+            <div id="mouse-chase-ui">
+            <span>🐭 <b>Score:</b> <span id="mouse-chase-score-display">0</span></span>
+            <span style="margin-left:20px;"><b>Time:</b> <span id="mouse-chase-timer">30</span>s</span>
+            <button id="close-mouse-chase" class="ui-btn" style="float:right;" onclick="endMouseChaseGame()">Exit</button>
             </div>
+        </div>
         </div>
 
     </div>

@@ -285,11 +285,11 @@ function showNotification(message, type = 'info') {
 function calculateUpgradeCost(type) {
     switch (type) {
         case 'click':
-            return 10 * Math.pow(2, upgradeLevel - 1);
+            return Math.floor(10 * Math.pow(2, upgradeLevel - 1));
         case 'autoclick':
-            return 50 * Math.pow(1.5, autoclickLevel); // Cost increases with level
+            return Math.floor(50 * Math.pow(1.5, autoclickLevel));
         case 'passive':
-            return 100 * Math.pow(1.5, passiveUpgradeCount);
+            return Math.floor(100 * Math.pow(1.5, passiveUpgradeCount));
         default:
             return 0;
     }
@@ -401,11 +401,6 @@ function applyPetBonus() { // Removed specific petType and level args as it reca
                 // xpPerClick is already a const global for now, so this bonus wouldn't apply here.
                 // If we want it to affect XP, we'd need a global XP multiplier.
                 // For now, let's make Phoenix give a small click power boost. (Or re-evaluate xpPerClick as let)
-                // Let's modify xp gain directly in handleCatClick if Phoenix is owned.
-                // For demonstration, if it affects XP, we might need to adjust xpPerClick in handleCatClick dynamically.
-                // Simpler: assume it's a constant, and if Phoenix gives a bonus, it applies at the point of XP calculation.
-                // Or: make `xpPerClick` a `let` and modify it. Let's make `xpPerClick` a `let` for simplicity.
-                // In game.js, ensure `const xpPerClick = 1;` is `let xpPerClick = 1;`
                 // I've left it as a const for now to avoid larger changes unless explicitly needed.
                 // For this example, I'll make Phoenix give a small bonus to passive income.
                 passiveIncome += (0.05 * pLevel); // Small passive income bonus for Phoenix
@@ -459,7 +454,7 @@ function updateAchievementsUI() {
     });
 
     if (Object.keys(achievements).length === 0) {
-        achievementsListDiv.innerHTML = '<p style="text-align: center; color: #777;">Достижения не определены.</p>';
+        achievementsListDiv.innerHTML = '<p style="text-align: center; color: #777;">No achievements defined.</p>';
         return;
     }
 
@@ -767,81 +762,177 @@ function startFishingGame() {
     let timer = 30;
     const fishingTimerDisplay = document.getElementById('fishing-timer');
     const fishingScoreDisplay = document.getElementById('fishing-score-display');
-    const fishingScene = document.getElementById('fishing-scene');
-    const goldenFishBonusActive = localStorage.getItem('goldenFishBonus') === 'true';
-
-    fishingScene.innerHTML = '';
     fishingScoreDisplay.textContent = fishingScore;
+    fishingTimerDisplay.textContent = timer;
 
-    const fishTypes = [
-        { emoji: '🐠', points: 10, speed: 1000, size: '3em' },
-        { emoji: '🐡', points: 15, speed: 800, size: '3em' },
-        { emoji: '🐙', points: 20, speed: 1200, size: '3.5em' },
-        { emoji: '🦀', points: 5, speed: 700, size: '2.5em' },
-        { emoji: '🐟', points: 12, speed: 900, size: '3em' },
-    ];
+    const canvas = document.getElementById('fishing-canvas');
+    const ctx = canvas.getContext('2d');
+    let fishes = [];
+    let hook = { x: canvas.width / 2, y: 0, vy: 0, isCasting: false, isReeling: false };
+    let isGameActive = true;
 
-    const spawnFish = () => {
-        if (!fishingGameActive) return;
+    // 3D water effect
+    function drawWater() {
+        ctx.save();
+        ctx.beginPath();
+        ctx.ellipse(canvas.width/2, canvas.height-20, canvas.width/2-10, 30, 0, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(33,150,243,0.15)';
+        ctx.fill();
+        ctx.restore();
+    }
 
-        let randomFishType = fishTypes[Math.floor(Math.random() * fishTypes.length)];
-        // If golden fish bonus is active, increase chance of golden fish
-        if (goldenFishBonusActive && Math.random() < 0.2) { // 20% chance to spawn golden fish
-            randomFishType = { emoji: '👑🐠', points: 50, speed: 600, size: '4em', isGold: true };
-        }
+    // Draw hook
+    function drawHook() {
+        ctx.save();
+        ctx.strokeStyle = "#888";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(hook.x, 0);
+        ctx.lineTo(hook.x, hook.y);
+        ctx.stroke();
 
-        const fish = document.createElement('div');
-        fish.classList.add('fish');
-        if (randomFishType.isGold) {
-            fish.classList.add('fish-gold');
-        }
-        fish.textContent = randomFishType.emoji;
-        fish.style.fontSize = randomFishType.size;
-        
-        fish.style.left = `${Math.random() * (fishingScene.offsetWidth - 70)}px`;
-        fish.style.top = `${Math.random() * (fishingScene.offsetHeight - 70)}px`;
+        // 3D hook
+        ctx.beginPath();
+        ctx.arc(hook.x, hook.y, 10, 0, Math.PI*2);
+        ctx.fillStyle = "#fff";
+        ctx.shadowColor = "#0288d1";
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.strokeStyle = "#0288d1";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.restore();
+    }
 
-        fishingScene.appendChild(fish);
+    // Draw fishes
+    function drawFishes() {
+        fishes.forEach(fish => {
+            ctx.save();
+            ctx.translate(fish.x, fish.y);
+            ctx.scale(fish.flip ? -1 : 1, 1);
+            ctx.rotate(Math.sin(Date.now()/300 + fish.x) * 0.07);
+            // 3D shadow
+            ctx.beginPath();
+            ctx.ellipse(0, 18, 18, 6, 0, 0, Math.PI*2);
+            ctx.fillStyle = "rgba(0,0,0,0.15)";
+            ctx.fill();
+            // Fish body
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 22, 12, 0, 0, Math.PI*2);
+            ctx.fillStyle = fish.color;
+            ctx.shadowColor = "#fff";
+            ctx.shadowBlur = 8;
+            ctx.fill();
+            // Eye
+            ctx.beginPath();
+            ctx.arc(8, -3, 2, 0, Math.PI*2);
+            ctx.fillStyle = "#222";
+            ctx.fill();
+            // Tail
+            ctx.beginPath();
+            ctx.moveTo(-22, 0);
+            ctx.lineTo(-32, -8);
+            ctx.lineTo(-32, 8);
+            ctx.closePath();
+            ctx.fillStyle = fish.color;
+            ctx.globalAlpha = 0.7;
+            ctx.fill();
+            ctx.globalAlpha = 1;
+            ctx.restore();
+        });
+    }
 
-        fish.onclick = () => {
-            if (fish.classList.contains('caught')) return;
-            
-            fishingScore += randomFishType.points;
-            fishingScoreDisplay.textContent = fishingScore;
-            fish.classList.add('caught');
-            playClickSound();
+    // Animate
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawWater();
+        drawFishes();
+        drawHook();
+        if (isGameActive) requestAnimationFrame(animate);
+    }
 
-            const scoreFloat = document.createElement('div');
-            scoreFloat.classList.add('coin-float');
-            scoreFloat.textContent = `+${randomFishType.points}`;
-            scoreFloat.style.left = `${fish.offsetLeft + fish.offsetWidth / 2}px`;
-            scoreFloat.style.top = `${fish.offsetTop}px`;
-            fishingScene.appendChild(scoreFloat);
-
-            setTimeout(() => {
-                fish.remove();
-                scoreFloat.remove();
-            }, 500);
+    // Fish logic
+    function spawnFish() {
+        if (!isGameActive) return;
+        const colors = ["#ffb300", "#039be5", "#43a047", "#e53935", "#8e24aa"];
+        const fish = {
+            x: Math.random() * (canvas.width - 80) + 40,
+            y: Math.random() * (canvas.height - 120) + 100,
+            vx: (Math.random() - 0.5) * 2.5,
+            vy: (Math.random() - 0.5) * 0.7,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            flip: Math.random() > 0.5,
+            points: Math.floor(Math.random() * 20) + 10
         };
-
+        fishes.push(fish);
         setTimeout(() => {
-            if (fish.parentNode === fishingScene && !fish.classList.contains('caught')) {
-                fish.remove();
-            }
-        }, randomFishType.speed + (Math.random() * 500));
+            fishes = fishes.filter(f => f !== fish);
+        }, 6000 + Math.random()*2000);
+    }
+
+    let fishSpawner = setInterval(spawnFish, 1200);
+
+    // Hook movement and catching
+    canvas.onmousedown = (e) => {
+        if (hook.isCasting || hook.isReeling) return;
+        hook.isCasting = true;
+        hook.vy = 7;
     };
 
-    fishingInterval = setInterval(spawnFish, 500 + Math.random() * 1000);
+    canvas.onmouseup = (e) => {
+        if (!hook.isCasting && !hook.isReeling) return;
+        hook.isCasting = false;
+        hook.isReeling = true;
+        hook.vy = -10;
+    };
 
+    function updateHook() {
+        if (hook.isCasting) {
+            hook.y += hook.vy;
+            if (hook.y > canvas.height - 30) {
+                hook.y = canvas.height - 30;
+                hook.vy = 0;
+            }
+        } else if (hook.isReeling) {
+            hook.y += hook.vy;
+            if (hook.y <= 0) {
+                hook.y = 0;
+                hook.vy = 0;
+                hook.isReeling = false;
+            }
+        }
+        // Check catch
+        fishes.forEach((fish, idx) => {
+            if (
+                Math.abs(hook.x - fish.x) < 25 &&
+                Math.abs(hook.y - fish.y) < 18 &&
+                (hook.isCasting || hook.isReeling)
+            ) {
+                fishingScore += fish.points;
+                document.getElementById('fishing-score-display').textContent = fishingScore;
+                fishes.splice(idx, 1);
+                playClickSound();
+            }
+        });
+    }
+
+    // Main game loop
+    let hookInterval = setInterval(updateHook, 20);
+
+    // Timer
     fishingTimerCountdown = setInterval(() => {
         timer--;
         fishingTimerDisplay.textContent = timer;
         if (timer <= 0) {
             clearInterval(fishingTimerCountdown);
-            clearInterval(fishingInterval);
+            clearInterval(fishSpawner);
+            clearInterval(hookInterval);
+            isGameActive = false;
             endFishingGame();
         }
     }, 1000);
+
+    animate();
 }
 
 function endFishingGame() {
@@ -870,278 +961,319 @@ document.getElementById('close-fishing').addEventListener('click', () => {
 
 // Погони за мышкой
 function startMouseChaseGame() {
-    if (mouseChaseActive) return;
+    let score = 0;
+    let timer = 30;
+    let mice = [];
+    let isGameActive = true;
 
-    mouseChaseActive = true;
-    mouseChaseScore = 0;
-    mouseChaseTimer = 30; // Сброс таймера
-    mousesOnScreen = []; // Очистка мышей
-    
-    // Скрываем все вкладки и показываем игровую область "Погони за мышкой"
-    document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
-    document.getElementById('mouse-chase-game').style.display = 'block';
-    
-    document.getElementById('mouse-chase-score-display').textContent = mouseChaseScore;
-    document.getElementById('mouse-chase-timer').textContent = mouseChaseTimer;
+    document.getElementById('mouse-chase-score-display').textContent = score;
+    document.getElementById('mouse-chase-timer').textContent = timer;
 
-    // Очищаем игровое поле от старых мышей (если остались)
-    const gameArea = document.getElementById('mouse-chase-scene');
-    gameArea.innerHTML = ''; 
+    const canvas = document.getElementById('mouse-chase-canvas');
+    const ctx = canvas.getContext('2d');
 
-    mouseChaseInterval = setInterval(() => {
-        mouseChaseTimer--;
-        document.getElementById('mouse-chase-timer').textContent = mouseChaseTimer;
-        if (mouseChaseTimer <= 0) {
-            endMouseChaseGame();
-        }
-    }, 1000); // Таймер игры уменьшается каждую секунду
+    function drawMouse(mouse) {
+        ctx.save();
+        ctx.translate(mouse.x, mouse.y);
+        ctx.scale(mouse.flip ? -1 : 1, 1);
+        ctx.rotate(Math.sin(Date.now() / 300 + mouse.x) * 0.07);
 
-    mouseSpawnInterval = setInterval(spawnMouse, MOUSE_SPAWN_RATE); // Спавн мышей
+        // Shadow
+        ctx.beginPath();
+        ctx.ellipse(0, 18, 18, 6, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.18)";
+        ctx.fill();
 
-    showNotification('Игра "Погоня за мышкой" началась!', 'info');
-    vibrate(100);
-}
+        // Body (3D)
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 22, 12, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "#bdbdbd";
+        ctx.shadowColor = "#fff";
+        ctx.shadowBlur = 8;
+        ctx.fill();
 
-function spawnMouse() {
-    const gameArea = document.getElementById('mouse-chase-scene');
-    const gameAreaRect = gameArea.getBoundingClientRect();
+        // Head
+        ctx.beginPath();
+        ctx.ellipse(14, -4, 8, 7, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "#bdbdbd";
+        ctx.fill();
 
-    const mouseSize = 40; // Размер мыши
-    const maxX = gameAreaRect.width - mouseSize;
-    const maxY = gameAreaRect.height - mouseSize;
+        // Ears
+        ctx.beginPath();
+        ctx.arc(20, -10, 4, 0, Math.PI * 2);
+        ctx.arc(10, -10, 3, 0, Math.PI * 2);
+        ctx.fillStyle = "#888";
+        ctx.fill();
 
-    if (maxX <= 0 || maxY <= 0) { // Проверка, что область игры видима и имеет размеры
-        console.warn("Mouse chase game area is too small or not visible to spawn mice.");
-        return;
+        // Nose
+        ctx.beginPath();
+        ctx.arc(23, -3, 2, 0, Math.PI * 2);
+        ctx.fillStyle = "#e57373";
+        ctx.fill();
+
+        // Eyes
+        ctx.beginPath();
+        ctx.arc(18, -6, 1.5, 0, Math.PI * 2);
+        ctx.arc(12, -6, 1.2, 0, Math.PI * 2);
+        ctx.fillStyle = "#222";
+        ctx.fill();
+
+        // Tail
+        ctx.beginPath();
+        ctx.moveTo(-22, 2);
+        ctx.bezierCurveTo(-32, 10, -38, -10, -25, -18);
+        ctx.strokeStyle = "#a1887f";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.restore();
     }
 
-    const mouse = document.createElement('div');
-    mouse.classList.add('mouse');
-    mouse.textContent = '🐭'; // Эмодзи мыши
-
-    // Случайные начальные позиции
-    let startX = Math.random() * maxX;
-    let startY = Math.random() * maxY;
-    mouse.style.left = `${startX}px`;
-    mouse.style.top = `${startY}px`;
-
-    // Случайная скорость и направление
-    const speed = MOUSE_SPEED_MIN + Math.random() * (MOUSE_SPEED_MAX - MOUSE_SPEED_MIN);
-    const angle = Math.random() * 2 * Math.PI; // Случайный угол движения
-    const dx = Math.cos(angle) * speed;
-    const dy = Math.sin(angle) * speed;
-
-    mouse.dataset.dx = dx;
-    mouse.dataset.dy = dy;
-    mouse.dataset.value = Math.floor(Math.random() * 5) + 1; // Мыши дают 1-5 очков
-
-    // Движение мыши
-    let mouseMoveInterval = setInterval(() => {
-        let currentX = parseFloat(mouse.style.left);
-        let currentY = parseFloat(mouse.style.top);
-
-        currentX += parseFloat(mouse.dataset.dx);
-        currentY += parseFloat(mouse.dataset.dy);
-
-        // Отскок от границ
-        if (currentX < 0 || currentX > maxX) {
-            mouse.dataset.dx = -parseFloat(mouse.dataset.dx);
-        }
-        if (currentY < 0 || currentY > maxY) {
-            mouse.dataset.dy = -parseFloat(mouse.dataset.dy);
-        }
-
-        mouse.style.left = `${Math.max(0, Math.min(maxX, currentX))}px`;
-        mouse.style.top = `${Math.max(0, Math.min(maxY, currentY))}px`;
-    }, MOUSE_TICK_RATE);
-
-    // Удаление мыши через некоторое время, если не кликнули
-    let despawnTimeout = setTimeout(() => {
-        if (mouse.parentNode === gameArea) { // Проверяем, что мышь еще на поле
-            gameArea.removeChild(mouse);
-            mousesOnScreen = mousesOnScreen.filter(m => m.element !== mouse);
-        }
-        clearInterval(mouseMoveInterval);
-    }, MOUSE_DESPAWN_TIME);
-
-    mouse.addEventListener('click', () => {
-        if (!mouseChaseActive) return;
-        playMouseClickSound();
-        vibrate(30);
-
-        const value = parseInt(mouse.dataset.value);
-        mouseChaseScore += value;
-        coins += value * 2; // Например, 1 мышь = 2 монеты
-        xp += value; // И немного XP
-
-        document.getElementById('mouse-chase-score-display').textContent = mouseChaseScore;
-        updateUI(); // Обновление счетчика монет/XP
-
-        // Удаление мыши при клике
-        gameArea.removeChild(mouse);
-        mousesOnScreen = mousesOnScreen.filter(m => m.element !== mouse);
-        clearTimeout(despawnTimeout); // Отменяем таймер исчезновения
-        clearInterval(mouseMoveInterval); // Останавливаем движение
-    });
-
-    gameArea.appendChild(mouse);
-    mousesOnScreen.push({ element: mouse, moveInterval: mouseMoveInterval, despawnTimeout: despawnTimeout });
-}
-
-function playMouseClickSound() {
-    if (soundEnabled) {
-        mouseClickSound.currentTime = 0;
-        mouseClickSound.play().catch(e => console.error("Error playing mouse click sound:", e));
+    function spawnMouse() {
+        if (!isGameActive) return;
+        const mouse = {
+            x: Math.random() > 0.5 ? 40 : canvas.width - 40,
+            y: Math.random() * (canvas.height - 80) + 40,
+            vx: (Math.random() > 0.5 ? 1 : -1) * (2 + Math.random() * 2),
+            flip: Math.random() > 0.5,
+            alive: true
+        };
+        mice.push(mouse);
+        setTimeout(() => {
+            mouse.alive = false;
+        }, 2500 + Math.random() * 1000);
     }
-}
 
-function endMouseChaseGame() {
-    if (!mouseChaseActive) return;
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Draw all mice
+        mice.forEach(mouse => {
+            if (mouse.alive) drawMouse(mouse);
+        });
+        if (isGameActive) requestAnimationFrame(animate);
+    }
 
-    mouseChaseActive = false;
-    clearInterval(mouseChaseInterval);
-    clearInterval(mouseSpawnInterval);
-    playGameEndSound(); // Воспроизвести звук завершения игры
-    vibrate(150);
+    function moveMice() {
+        mice.forEach(mouse => {
+            if (mouse.alive) {
+                mouse.x += mouse.vx;
+                if (mouse.x < 20 || mouse.x > canvas.width - 20) {
+                    mouse.vx *= -1;
+                    mouse.flip = !mouse.flip;
+                }
+            }
+        });
+        // Remove dead mice
+        mice = mice.filter(m => m.alive);
+    }
 
-    // Очищаем все оставшиеся мыши и их интервалы
-    const gameArea = document.getElementById('mouse-chase-scene');
-    mousesOnScreen.forEach(mouseData => {
-        clearInterval(mouseData.moveInterval);
-        clearTimeout(mouseData.despawnTimeout);
-        if (mouseData.element.parentNode === gameArea) {
-            gameArea.removeChild(mouseData.element);
+    canvas.onclick = function(e) {
+        if (!isGameActive) return;
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        let caught = false;
+        mice.forEach(mouse => {
+            if (
+                mouse.alive &&
+                Math.abs(mx - mouse.x) < 25 &&
+                Math.abs(my - mouse.y) < 18
+            ) {
+                mouse.alive = false;
+                score++;
+                document.getElementById('mouse-chase-score-display').textContent = score;
+                if (typeof playClickSound === "function") playClickSound();
+                caught = true;
+            }
+        });
+        if (caught) showNotification('Mouse caught!', 'success');
+    };
+
+    // Game loop
+    let moveInterval = setInterval(moveMice, 20);
+    let spawnInterval = setInterval(spawnMouse, 900);
+
+    let timerInterval = setInterval(() => {
+        timer--;
+        document.getElementById('mouse-chase-timer').textContent = timer;
+        if (timer <= 0) {
+            isGameActive = false;
+            clearInterval(moveInterval);
+            clearInterval(spawnInterval);
+            clearInterval(timerInterval);
+            endMouseChaseGame(score);
         }
-    });
-    mousesOnScreen = [];
+    }, 1000);
 
-    let coinsEarned = mouseChaseScore * 2; // Общий заработок монет
-    let xpEarned = mouseChaseScore; // Общий заработок XP
+    animate();
 
-    if (mouseChaseScore > mouseChaseHighScore) {
-        mouseChaseHighScore = mouseChaseScore;
-        showNotification(`Новый рекорд в "Погоне за мышкой": ${mouseChaseHighScore} очков!`, 'gold');
-    } else {
-        showNotification(`Игра окончена! Вы набрали ${mouseChaseScore} очков.`, 'info');
-    }
-    showNotification(`Вы заработали ${coinsEarned} монет и ${xpEarned} XP!`, 'success');
-
-    coins += coinsEarned;
-    xp += xpEarned;
-    saveGame();
-    updateUI();
-
-    // Возвращаемся к вкладке мини-игр
-    document.getElementById('mouse-chase-game').style.display = 'none';
-    showTab('tab-minigames');
-    updateMiniGameHighScoresUI(); // Обновить рекорды
-}
-
-function playGameEndSound() {
-    if (soundEnabled) {
-        gameEndSound.currentTime = 0;
-        gameEndSound.play().catch(e => console.error("Error playing game end sound:", e));
-    }
+    document.getElementById('close-mouse-chase').onclick = () => {
+        isGameActive = false;
+        clearInterval(moveInterval);
+        clearInterval(spawnInterval);
+        clearInterval(timerInterval);
+        document.getElementById('mouse-chase-game').style.display = 'none';
+    };
 }
 
 // Прыжки с котом
 function startJumpGame() {
     jumpScore = 0;
-    isJumping = false;
-    obstaclePosition = 0;
-    const catJumper = document.getElementById('cat-jumper');
-    const jumpObstacle = document.getElementById('jump-obstacle');
-    const jumpScoreDisplay = document.getElementById('jump-score');
-
-    catJumper.style.bottom = '0px';
-    jumpObstacle.style.right = '-30px';
-    jumpScoreDisplay.textContent = jumpScore;
-
-    catJumper.style.left = '50px';
-    catJumper.textContent = '🐱';
-
-    // Obstacle movement speed increases with score/level for challenge
+    let isJumping = false;
+    let catY = 250;
+    let catVY = 0;
+    let gravity = 1;
+    let groundY = 250;
+    let obstacleX = 600;
     let obstacleSpeed = 5;
+    let isGameActive = true;
 
-    jumpInterval = setInterval(() => {
-        if (!jumpGameActive) return;
+    const canvas = document.getElementById('jump-canvas');
+    const ctx = canvas.getContext('2d');
+    document.getElementById('jump-score').textContent = jumpScore;
 
-        obstaclePosition += obstacleSpeed;
-        jumpObstacle.style.right = `${obstaclePosition}px`;
+    function drawGround() {
+        ctx.save();
+        ctx.beginPath();
+        ctx.ellipse(300, groundY + 40, 260, 30, 0, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(120, 144, 156, 0.18)';
+        ctx.fill();
+        ctx.restore();
+    }
 
-        // Collision detection (simplified)
-        const catRect = catJumper.getBoundingClientRect();
-        const obstacleRect = jumpObstacle.getBoundingClientRect();
+    function drawCat() {
+        ctx.save();
+        ctx.translate(100, catY);
+        ctx.scale(1, 1);
+        ctx.shadowColor = "#1976d2";
+        ctx.shadowBlur = 16;
+        // Cat body (3D effect)
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 28, 18, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffb300";
+        ctx.fill();
+        // Head
+        ctx.beginPath();
+        ctx.arc(0, -20, 15, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffb300";
+        ctx.fill();
+        // Eyes
+        ctx.beginPath();
+        ctx.arc(-5, -23, 2.5, 0, Math.PI * 2);
+        ctx.arc(5, -23, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = "#222";
+        ctx.fill();
+        // Ears
+        ctx.beginPath();
+        ctx.moveTo(-10, -32);
+        ctx.lineTo(-15, -42);
+        ctx.lineTo(-5, -30);
+        ctx.moveTo(10, -32);
+        ctx.lineTo(15, -42);
+        ctx.lineTo(5, -30);
+        ctx.strokeStyle = "#ffb300";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        // Shadow under cat
+        ctx.beginPath();
+        ctx.ellipse(0, 28, 18, 6, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.15)";
+        ctx.fill();
+        ctx.restore();
+    }
 
-        if (catRect.right > obstacleRect.left &&
-            catRect.left < obstacleRect.right &&
-            catRect.bottom > obstacleRect.top &&
-            catRect.top < obstacleRect.bottom) {
-            if (!isJumping) { // Only collide if not jumping
-                endJumpGame();
-                return;
+    function drawObstacle() {
+        ctx.save();
+        ctx.translate(obstacleX, groundY + 10);
+        ctx.rotate(Math.sin(Date.now() / 200) * 0.1);
+        // 3D block
+        ctx.beginPath();
+        ctx.rect(-15, -30, 30, 60);
+        ctx.fillStyle = "#8d6e63";
+        ctx.shadowColor = "#333";
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        // Shadow
+        ctx.beginPath();
+        ctx.ellipse(0, 35, 15, 5, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.18)";
+        ctx.fill();
+        ctx.restore();
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawGround();
+        drawObstacle();
+        drawCat();
+        if (isGameActive) requestAnimationFrame(animate);
+    }
+
+    function gameTick() {
+        // Cat physics
+        catY += catVY;
+        catVY += gravity;
+        if (catY > groundY) {
+            catY = groundY;
+            catVY = 0;
+            isJumping = false;
+        }
+        // Obstacle movement
+        obstacleX -= obstacleSpeed;
+        if (obstacleX < -30) {
+            obstacleX = 600 + Math.random() * 80;
+            jumpScore++;
+            document.getElementById('jump-score').textContent = jumpScore;
+            obstacleSpeed += 0.15;
+            showNotification(`Point! Current score: ${jumpScore}`, 'info');
+        }
+        // Collision
+        if (
+            100 + 28 > obstacleX - 15 &&
+            100 - 28 < obstacleX + 15 &&
+            catY + 18 > groundY - 30
+        ) {
+            if (!isJumping) {
+                endJumpGame(jumpScore);
+                isGameActive = false;
             }
         }
-        
+    }
 
-        if (obstaclePosition > document.getElementById('jump-scene').offsetWidth + 30) {
-            obstaclePosition = -30;
-            jumpScore++;
-            jumpScoreDisplay.textContent = jumpScore;
-            showNotification(`Point! Current score: ${jumpScore}`, 'info');
-            obstacleSpeed += 0.2; // Make it harder over time
-        }
+    let tickInterval = setInterval(gameTick, 20);
+    animate();
 
-    }, 20);
-
-    document.getElementById('jump-scene').onclick = () => {
-        if (!isJumping) {
+    canvas.onclick = () => {
+        if (!isJumping && isGameActive) {
+            catVY = -16;
             isJumping = true;
-            let jumpHeight = 0;
-            let jumpSpeed = 8;
-
-            const jumpAnimation = setInterval(() => {
-                if (!jumpGameActive) {
-                    clearInterval(jumpAnimation);
-                    return;
-                }
-
-                jumpHeight += jumpSpeed;
-                jumpSpeed -= 1;
-                catJumper.style.bottom = `${jumpHeight}px`;
-
-                if (jumpHeight <= 0 && jumpSpeed < 0) {
-                    clearInterval(jumpAnimation);
-                    isJumping = false;
-                    catJumper.style.bottom = '0px';
-                }
-            }, 20);
         }
+    };
+
+    document.getElementById('close-jump').onclick = () => {
+        isGameActive = false;
+        clearInterval(tickInterval);
+        document.getElementById('jump-game').style.display = 'none';
     };
 }
 
-function endJumpGame() {
+function endJumpGame(score) {
     jumpGameActive = false;
-    clearInterval(jumpInterval);
     document.getElementById('jump-game').style.display = 'none';
-    const finalBonus = jumpScore * 5;
+    const finalBonus = score * 5;
     coins += finalBonus;
-    xp += jumpScore * 2;
-    showNotification(`The jumps are over! You scored ${jumpScore} points & earned ${finalBonus} coins!`, 'success');
+    xp += score * 2;
+    showNotification(`The jumps are over! You scored ${score} points & earned ${finalBonus} coins!`, 'success');
 
     // Update high score for jump
-    jumpHighScores.push(jumpScore);
-    jumpHighScores.sort((a, b) => b - a);
-    jumpHighScores = jumpHighScores.slice(0, 5);
+    if (!window.jumpHighScore || score > window.jumpHighScore) {
+        window.jumpHighScore = score;
+        showNotification(`New record in Jumping Cat: ${score} points!`, 'gold');
+    }
     updateUI();
     saveGame();
-    checkAchievements('jumpGameEnd'); // Добавлено
+    checkAchievements('jumpGameEnd');
 }
-
-document.getElementById('close-jump').addEventListener('click', () => {
-    clearInterval(jumpInterval);
-    endJumpGame();
-});
 
 function updateMiniGameHighScoresUI() {
     const fishingScoresList = document.getElementById('fishing-high-scores');
@@ -1149,11 +1281,10 @@ function updateMiniGameHighScoresUI() {
     if (fishingHighScores.length === 0) {
         fishingScoresList.innerHTML = '<p>No records.</p>';
     } else {
-        fishingHighScores.forEach((score, index) => {
-            const li = document.createElement('li');
-            li.textContent = `#${index + 1}: ${score} points`;
-            fishingScoresList.appendChild(li);
-        });
+        const bestFishing = Math.max(...fishingHighScores);
+        const li = document.createElement('li');
+        li.textContent = `Best: ${bestFishing} points`;
+        fishingScoresList.appendChild(li);
     }
 
     const jumpScoresList = document.getElementById('jump-high-scores');
@@ -1161,11 +1292,10 @@ function updateMiniGameHighScoresUI() {
     if (jumpHighScores.length === 0) {
         jumpScoresList.innerHTML = '<p>No records.</p>';
     } else {
-        jumpHighScores.forEach((score, index) => {
-            const li = document.createElement('li');
-            li.textContent = `#${index + 1}: ${score} points`;
-            jumpScoresList.appendChild(li);
-        });
+        const bestJump = Math.max(...jumpHighScores);
+        const li = document.createElement('li');
+        li.textContent = `Best: ${bestJump} points`;
+        jumpScoresList.appendChild(li);
     }
 
     const mouseChaseHighScoreElement = document.getElementById('mouse-chase-high-score-display');
@@ -1208,13 +1338,15 @@ function saveGame() {
     if (Telegram && Telegram.WebApp) {
         Telegram.WebApp.HapticFeedback.impactOccurred('light');
     }
+    if (isNaN(coins)) coins = 0;
 }
 
 function loadGame() {
     const savedData = localStorage.getItem('catClickerGame');
     if (savedData) {
         const gameData = JSON.parse(savedData);
-        coins = gameData.coins || 0;
+        coins = Number(gameData.coins);
+        if (isNaN(coins)) coins = 0;
         clickPower = gameData.clickPower || 1;
         autoclickLevel = gameData.autoclickLevel || 0; // Load level
         currentCat = gameData.currentCat || 1;
@@ -1395,6 +1527,13 @@ function playCriticalSound() {
     }
 }
 
+function playAchievementSound() {
+    if (soundEnabled && typeof achievementSound !== 'undefined') {
+        achievementSound.currentTime = 0;
+        achievementSound.play().catch(e => console.log("Sound play error:", e));
+    }
+}
+
 function vibrate(duration) {
     if (vibrationEnabled && navigator.vibrate) {
         navigator.vibrate(duration);
@@ -1404,8 +1543,8 @@ function vibrate(duration) {
 // --- Инициализация игры при загрузке DOM ---
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadGame();
     initializeAchievements(); // Добавлено
+    loadGame();
 
     // ========= НАЧАЛО ВСТАВКИ =========
     try {
@@ -1483,4 +1622,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateUI();
 });
-
