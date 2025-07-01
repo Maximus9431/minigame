@@ -26,10 +26,12 @@
             <button class="tab-button" onclick="showTab('tab-minigames')"><i class="fas fa-gamepad"></i> Mini-games</button>
             <button class="tab-button" onclick="showTab('tab-achievements')"><i class="fa-solid fa-trophy"></i> Achievements</button>
             <button class="tab-button" onclick="showTab('tab-rebirth')"><i class="fa-solid fa-star"></i> Rebirth</button>
+            <button class="tab-button" onclick="showTab('tab-skins')"><i class="fa-solid fa-brush"></i> Skins</button>
         </div>
 
         <div class="tab-content" id="tab-game">
             <div id="cat-area">
+                <div id="companions-area"></div>
               <div id="cat-coin-container">
                 <div class="cat-coin">
                   <img id="cat-img" src="cat1.png" alt="Cat" />
@@ -94,7 +96,7 @@
                             <h4>Dog</h4>
                             <p>Increases passive income.</p>
                         </div>
-                        <span class="item-price">500</span>
+                        <span class="item-price"><i class="fa-solid fa-coins"></i> 500</span>
                         <button class="ui-btn buy-btn" onclick="buyPet('dog')"><i class="fas fa-dog"></i> Buy</button>
                     </div>
                     <div class="pet-item" id="petа-dragon-item">
@@ -102,7 +104,7 @@
                             <h4>Dragon</h4>
                             <p>Very rare. Increases click strength.</p>
                         </div>
-                        <span class="item-price">5 000</span>
+                        <span class="item-price"><i class="fa-solid fa-coins"></i> 5 000</span>
                         <button class="ui-btn buy-btn" onclick="buyPet('dragon')"><i class="fas fa-dragon"></i> Buy</button>
                     </div>
                     <div class="pet-item" id="pet-phoenix-item">
@@ -110,7 +112,7 @@
                             <h4>Phoenix</h4>
                             <p>Very rare. Gives a bonus to XP.</p>
                         </div>
-                        <span class="item-price">7 500</span>
+                        <span class="item-price"><i class="fa-solid fa-coins"></i> 7 500</span>
                         <button class="ui-btn buy-btn" onclick="buyPet('phoenix')"><i class="fas fa-fire"></i> Buy</button>
                     </div>
                      <div class="pet-item" id="pet-unicorn-item">
@@ -118,7 +120,7 @@
                             <h4>Unicorn</h4>
                             <p>Very rare. Increases the chance of rare events (critical clicks).</p>
                         </div>
-                        <span class="item-price">10 000</span>
+                        <span class="item-price"><i class="fa-solid fa-coins"></i> 10 000</span>
                         <button class="ui-btn buy-btn" onclick="buyPet('unicorn')"><i class="fa-solid fa-unicorn"></i> Buy</button>
                     </div>
                 </div>
@@ -185,6 +187,13 @@
                     После перерождения вы начнете игру с 1 уровня, но ваш новый множитель будет применяться ко всем доходам.
                 </p>
             </div>
+        </div>
+
+        <div class="tab-content" id="tab-skins" style="display:none;">
+            <h2><i class="fa-solid fa-brush"></i> Skins Shop</h2>
+            <div id="skins-shop-list" class="shop-section"></div>
+            <h3>Your Skins</h3>
+            <div id="owned-skins-list" class="shop-section"></div>
         </div>
 
         <div id="settings-overlay" class="modal-overlay">
@@ -266,7 +275,10 @@
         </div>
         </div>
 
+        <button id="send-gift-btn" class="ui-btn"><i class="fa-solid fa-gift"></i> Send Gift to Friend</button>
     </div>
+
+    <canvas id="background-canvas" style="position:fixed; left:0; top:0; width:100vw; height:100vh; z-index:-2; pointer-events:none;"></canvas>
 
     <script src="game.js"></script>
 </body>

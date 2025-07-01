@@ -233,6 +233,7 @@ function updateUI() {
     updatePetsUI();
     updateMiniGameHighScoresUI(); // Update mini-game high scores
     updateAchievementsUI(); // Добавлено
+    renderCompanionPets(); // Добавлено
 }
 
 function levelUp() {
@@ -257,6 +258,11 @@ function showTab(tabId) {
 
     document.getElementById(tabId).style.display = 'block';
     document.querySelector(`.tab-button[onclick*="${tabId}"]`).classList.add('active');
+
+    if (tabId === 'tab-skins') {
+        renderSkinsShop();
+        renderOwnedSkins();
+    }
 }
 
 function showNotification(message, type = 'info') {
@@ -428,9 +434,9 @@ function updatePetsUI() {
                     <p>Level: ${petLevels[petType]}</p>
                     <p>Bonus: ${getPetBonusDescription(petType, petLevels[petType])}</p>
                 </div>
-                <span class="item-price">${getPetLevelUpCost(petType)}</span>
+                <span class="item-price"><i class="fa-solid fa-coins"></i> ${getPetLevelUpCost(petType)}</span>
                 <button class="ui-btn buy-btn" onclick="levelUpPet('${petType}')">
-                    <i class="fas fa-level-up-alt"></i> Улучшить
+                    <i class="fas fa-level-up-alt"></i> Upgrade
                 </button>
             `;
             petsList.appendChild(petDiv);
@@ -441,6 +447,41 @@ function updatePetsUI() {
         petsList.innerHTML = '<p style="text-align: center; color: #777;">You do not have any pets yet. Buy them in the store!</p>';
     }
 }
+
+function renderCompanionPets() {
+    const area = document.getElementById('companions-area');
+    area.innerHTML = '';
+    const petIcons = {
+        dog: '🐶',
+        dragon: '🐉',
+        phoenix: '🦜',
+        unicorn: '🦄'
+    };
+    let left = 60;
+    Object.keys(petLevels).forEach((pet, idx) => {
+        if (petLevels[pet] > 0) {
+            const el = document.createElement('span');
+            el.className = 'companion-pet';
+            el.textContent = petIcons[pet] || '🐾';
+            el.style.left = `${left + idx * 40}px`;
+            el.style.bottom = `${10 + Math.sin(Date.now()/400 + idx)*8}px`;
+            area.appendChild(el);
+        }
+    });
+}
+// Вызови renderCompanionPets() после updateUI и при покупке/улучшении питомца
+
+// Питомцы иногда приносят монеты:
+setInterval(() => {
+    Object.keys(petLevels).forEach(pet => {
+        if (petLevels[pet] > 0 && Math.random() < 0.01) { // 1% шанс раз в секунду
+            const bonus = 10 * petLevels[pet];
+            coins += bonus;
+            showNotification(`Your ${pet} brought you ${bonus} coins!`, 'success');
+            updateUI();
+        }
+    });
+}, 1000);
 
 function updateAchievementsUI() {
     const achievementsListDiv = document.getElementById('achievements-list');
@@ -973,60 +1014,82 @@ function startMouseChaseGame() {
     const ctx = canvas.getContext('2d');
 
     function drawMouse(mouse) {
-        ctx.save();
-        ctx.translate(mouse.x, mouse.y);
-        ctx.scale(mouse.flip ? -1 : 1, 1);
-        ctx.rotate(Math.sin(Date.now() / 300 + mouse.x) * 0.07);
+        const skin = allSkins.find(s => s.id === selectedSkins.mouse);
+        if (skin && skin.img) {
+            const img = new Image();
+            img.src = skin.img;
+            img.onload = () => {
+                ctx.save();
+                ctx.translate(mouse.x, mouse.y);
+                ctx.scale(mouse.flip ? -1 : 1, 1);
+                ctx.drawImage(img, -24, -24, 48, 48);
+                // Эффект glow
+                if (skin.effect === 'glow') {
+                    ctx.globalAlpha = 0.6;
+                    ctx.shadowColor = "#ffd700";
+                    ctx.shadowBlur = 18;
+                    ctx.drawImage(img, -28, -28, 56, 56);
+                    ctx.globalAlpha = 1;
+                    ctx.shadowBlur = 0;
+                }
+                ctx.restore();
+            };
+        } else {
+            ctx.save();
+            ctx.translate(mouse.x, mouse.y);
+            ctx.scale(mouse.flip ? -1 : 1, 1);
+            ctx.rotate(Math.sin(Date.now() / 300 + mouse.x) * 0.07);
 
-        // Shadow
-        ctx.beginPath();
-        ctx.ellipse(0, 18, 18, 6, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0,0,0,0.18)";
-        ctx.fill();
+            // Shadow
+            ctx.beginPath();
+            ctx.ellipse(0, 18, 18, 6, 0, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(0,0,0,0.18)";
+            ctx.fill();
 
-        // Body (3D)
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 22, 12, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#bdbdbd";
-        ctx.shadowColor = "#fff";
-        ctx.shadowBlur = 8;
-        ctx.fill();
+            // Body (3D)
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 22, 12, 0, 0, Math.PI * 2);
+            ctx.fillStyle = "#bdbdbd";
+            ctx.shadowColor = "#fff";
+            ctx.shadowBlur = 8;
+            ctx.fill();
 
-        // Head
-        ctx.beginPath();
-        ctx.ellipse(14, -4, 8, 7, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "#bdbdbd";
-        ctx.fill();
+            // Head
+            ctx.beginPath();
+            ctx.ellipse(14, -4, 8, 7, 0, 0, Math.PI * 2);
+            ctx.fillStyle = "#bdbdbd";
+            ctx.fill();
 
-        // Ears
-        ctx.beginPath();
-        ctx.arc(20, -10, 4, 0, Math.PI * 2);
-        ctx.arc(10, -10, 3, 0, Math.PI * 2);
-        ctx.fillStyle = "#888";
-        ctx.fill();
+            // Ears
+            ctx.beginPath();
+            ctx.arc(20, -10, 4, 0, Math.PI * 2);
+            ctx.arc(10, -10, 3, 0, Math.PI * 2);
+            ctx.fillStyle = "#888";
+            ctx.fill();
 
-        // Nose
-        ctx.beginPath();
-        ctx.arc(23, -3, 2, 0, Math.PI * 2);
-        ctx.fillStyle = "#e57373";
-        ctx.fill();
+            // Nose
+            ctx.beginPath();
+            ctx.arc(23, -3, 2, 0, Math.PI * 2);
+            ctx.fillStyle = "#e57373";
+            ctx.fill();
 
-        // Eyes
-        ctx.beginPath();
-        ctx.arc(18, -6, 1.5, 0, Math.PI * 2);
-        ctx.arc(12, -6, 1.2, 0, Math.PI * 2);
-        ctx.fillStyle = "#222";
-        ctx.fill();
+            // Eyes
+            ctx.beginPath();
+            ctx.arc(18, -6, 1.5, 0, Math.PI * 2);
+            ctx.arc(12, -6, 1.2, 0, Math.PI * 2);
+            ctx.fillStyle = "#222";
+            ctx.fill();
 
-        // Tail
-        ctx.beginPath();
-        ctx.moveTo(-22, 2);
-        ctx.bezierCurveTo(-32, 10, -38, -10, -25, -18);
-        ctx.strokeStyle = "#a1887f";
-        ctx.lineWidth = 3;
-        ctx.stroke();
+            // Tail
+            ctx.beginPath();
+            ctx.moveTo(-22, 2);
+            ctx.bezierCurveTo(-32, 10, -38, -10, -25, -18);
+            ctx.strokeStyle = "#a1887f";
+            ctx.lineWidth = 3;
+            ctx.stroke();
 
-        ctx.restore();
+            ctx.restore();
+        }
     }
 
     function spawnMouse() {
@@ -1621,4 +1684,325 @@ document.addEventListener('DOMContentLoaded', () => {
     checkDailyReward();
 
     updateUI();
+
+    updateCatSkin(); // <-- Добавь вызов после updateUI()
 });
+
+// --- Скины ---
+const allSkins = [
+    { id: 'cat1', name: 'Classic Cat', price: 0, type: 'cat', img: 'cat1.png', rarity: 'common' },
+    { id: 'cat2', name: 'Ninja Cat', price: 500, type: 'cat', img: 'cat2.png', rarity: 'rare' },
+    { id: 'cat3', name: 'Golden Cat', price: 2000, type: 'cat', img: 'cat3.png', rarity: 'epic', effect: 'shine' },
+    { id: 'mouse1', name: 'Gray Mouse', price: 0, type: 'mouse', img: 'mouse1.png', rarity: 'common' },
+    { id: 'mouse2', name: 'Cheese Mouse', price: 400, type: 'mouse', img: 'mouse2.png', rarity: 'rare' },
+    { id: 'fish1', name: 'Blue Fish', price: 0, type: 'fish', img: 'fish1.png', rarity: 'common' },
+    { id: 'fish2', name: 'Gold Fish', price: 1000, type: 'fish', img: 'fish2.png', rarity: 'epic', effect: 'glow' }
+];
+
+let ownedSkins = JSON.parse(localStorage.getItem('ownedSkins') || '["cat1","mouse1","fish1"]');
+let selectedSkins = JSON.parse(localStorage.getItem('selectedSkins') || '{"cat":"cat1","mouse":"mouse1","fish":"fish1"}');
+
+function saveSkins() {
+    localStorage.setItem('ownedSkins', JSON.stringify(ownedSkins));
+    localStorage.setItem('selectedSkins', JSON.stringify(selectedSkins));
+}
+
+function renderSkinsShop() {
+    const shop = document.getElementById('skins-shop-list');
+    shop.innerHTML = '';
+    allSkins.forEach(skin => {
+        if (ownedSkins.includes(skin.id)) return;
+        const div = document.createElement('div');
+        div.className = 'upgrade-item';
+        div.innerHTML = `
+            <div class="item-info">
+                <h4>${skin.name} <span style="font-size:0.8em; color:#888;">[${skin.rarity}]</span></h4>
+                <img src="${skin.img}" alt="${skin.name}" style="width:48px; height:48px; border-radius:12px; box-shadow:0 2px 8px #0002;">
+            </div>
+            <div class="item-price"><i class="fa-solid fa-coins"></i> ${skin.price}</div>
+            <button class="buy-btn ui-btn" onclick="buySkin('${skin.id}')">Buy</button>
+        `;
+        shop.appendChild(div);
+    });
+}
+
+function renderOwnedSkins() {
+    const owned = document.getElementById('owned-skins-list');
+    owned.innerHTML = '';
+    ['cat','mouse','fish'].forEach(type => {
+        const skins = allSkins.filter(s => s.type === type && ownedSkins.includes(s.id));
+        const title = type.charAt(0).toUpperCase() + type.slice(1) + ' skins:';
+        const div = document.createElement('div');
+        div.innerHTML = `<h4>${title}</h4>`;
+        skins.forEach(skin => {
+            const btn = document.createElement('button');
+            btn.className = 'ui-btn';
+            btn.innerHTML = `<img src="${skin.img}" alt="${skin.name}" style="width:32px; height:32px; border-radius:8px;vertical-align:middle;"> ${skin.name}` +
+                (selectedSkins[type] === skin.id ? ' <span style="color:#28a745;">(Selected)</span>' : '');
+            btn.onclick = () => selectSkin(type, skin.id);
+            div.appendChild(btn);
+        });
+        owned.appendChild(div);
+    });
+}
+
+function buySkin(id) {
+    const skin = allSkins.find(s => s.id === id);
+    if (!skin) return;
+    if (coins < skin.price) {
+        showNotification('Not enough coins!', 'error');
+        return;
+    }
+    coins -= skin.price;
+    ownedSkins.push(id);
+    showNotification(`You bought ${skin.name}!`, 'success');
+    saveSkins();
+    updateUI();
+    renderSkinsShop();
+    renderOwnedSkins();
+}
+
+function selectSkin(type, id) {
+    selectedSkins[type] = id;
+    saveSkins();
+    renderOwnedSkins();
+    showNotification(`Selected new ${type} skin!`, 'success');
+    updateUI();
+    updateCatSkin(); // <-- Добавь вызов для кота
+
+    // Перерисовка canvas-игр (если мини-игра сейчас активна)
+    if (type === 'mouse' && document.getElementById('mouse-chase-game').style.display !== 'none') {
+        startMouseChaseGame();
+    }
+    if (type === 'fish' && document.getElementById('fishing-game').style.display !== 'none') {
+        startFishingGame();
+    }
+}
+
+function updateCatSkin() {
+    const catImg = document.getElementById('cat-img');
+    if (catImg && selectedSkins && selectedSkins.cat) {
+        catImg.src = allSkins.find(s => s.id === selectedSkins.cat)?.img || 'cat1.png';
+        // Эффект shine для кота
+        const skin = allSkins.find(s => s.id === selectedSkins.cat);
+        if (skin && skin.effect === 'shine') {
+            catImg.classList.add('skin-shine');
+        } else {
+            catImg.classList.remove('skin-shine');
+        }
+    }
+}
+
+// --- Фоновая анимация ---
+
+function startBackgroundAnimation() {
+    const canvas = document.getElementById('background-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    // Подгоняем размер под окно
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Генерируем облака и звёзды
+    let clouds = [];
+    let stars = [];
+    function generateClouds() {
+        clouds = [];
+        for (let i = 0; i < 7; i++) {
+            clouds.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height * 0.4,
+                r: 40 + Math.random() * 60,
+                speed: 0.2 + Math.random() * 0.3,
+                opacity: 0.5 + Math.random() * 0.3
+            });
+        }
+    }
+    function generateStars() {
+        stars = [];
+        for (let i = 0; i < 80; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height * 0.7,
+                r: 0.7 + Math.random() * 1.5,
+                opacity: 0.5 + Math.random() * 0.5
+            });
+        }
+    }
+    generateClouds();
+    generateStars();
+
+    // Генерируем листья и пузырьки
+    let leaves = [];
+    let bubbles = [];
+    function generateLeaves() {
+        leaves = [];
+        for (let i = 0; i < 15; i++) {
+            leaves.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                r: 12 + Math.random() * 14,
+                speedY: 0.5 + Math.random() * 1.2,
+                speedX: -0.5 + Math.random(),
+                angle: Math.random() * Math.PI * 2,
+                color: ['#ffb300', '#ff7043', '#a1887f', '#ffd54f'][Math.floor(Math.random()*4)],
+                swing: 0.5 + Math.random() * 1.5
+            });
+        }
+    }
+    function generateBubbles() {
+        bubbles = [];
+        for (let i = 0; i < 18; i++) {
+            bubbles.push({
+                x: Math.random() * canvas.width,
+                y: canvas.height - (Math.random() * 80),
+                r: 6 + Math.random() * 10,
+                speed: 0.4 + Math.random() * 0.7,
+                opacity: 0.2 + Math.random() * 0.4
+            });
+        }
+    }
+    generateLeaves();
+    generateBubbles();
+
+    // Анимация
+    function animate() {
+        // Определяем время суток
+        const hour = new Date().getHours();
+        const isNight = hour < 6 || hour >= 20;
+
+        // Фон неба
+        if (isNight) {
+            // Ночь
+            const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, "#0d133d");
+            grad.addColorStop(1, "#232b50");
+            ctx.fillStyle = grad;
+        } else {
+            // День
+            const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, "#b3e5fc");
+            grad.addColorStop(1, "#e0f7fa");
+            ctx.fillStyle = grad;
+        }
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Звёзды ночью
+        if (isNight) {
+            stars.forEach(star => {
+                ctx.save();
+                ctx.globalAlpha = star.opacity * (0.7 + 0.3 * Math.sin(Date.now()/700 + star.x));
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+                ctx.fillStyle = "#fffde7";
+                ctx.shadowColor = "#fff";
+                ctx.shadowBlur = 8;
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+
+        // Облака днём
+        if (!isNight) {
+            clouds.forEach(cloud => {
+                ctx.save();
+                ctx.globalAlpha = cloud.opacity;
+                ctx.beginPath();
+                ctx.ellipse(cloud.x, cloud.y, cloud.r, cloud.r * 0.6, 0, 0, Math.PI * 2);
+                ctx.fillStyle = "#fff";
+                ctx.shadowColor = "#b3e5fc";
+                ctx.shadowBlur = 24;
+                ctx.fill();
+                ctx.restore();
+
+                cloud.x += cloud.speed;
+                if (cloud.x - cloud.r > canvas.width) {
+                    cloud.x = -cloud.r;
+                    cloud.y = Math.random() * canvas.height * 0.4;
+                }
+            });
+        }
+
+        // Листья осенью (показывать с сентября по ноябрь)
+        const month = new Date().getMonth();
+        const isAutumn = month >= 8 && month <= 10;
+        if (isAutumn) {
+            leaves.forEach(leaf => {
+                ctx.save();
+                ctx.globalAlpha = 0.7;
+                ctx.translate(leaf.x, leaf.y);
+                ctx.rotate(leaf.angle + Math.sin(Date.now()/600 + leaf.x));
+                ctx.beginPath();
+                ctx.ellipse(0, 0, leaf.r, leaf.r * 0.5, 0, 0, Math.PI * 2);
+                ctx.fillStyle = leaf.color;
+                ctx.shadowColor = "#ffecb3";
+                ctx.shadowBlur = 8;
+                ctx.fill();
+                ctx.restore();
+
+                leaf.x += Math.sin(Date.now()/800 + leaf.y) * leaf.swing + leaf.speedX;
+                leaf.y += leaf.speedY;
+                leaf.angle += 0.01 + Math.random()*0.01;
+                if (leaf.y > canvas.height + 20) {
+                    leaf.x = Math.random() * canvas.width;
+                    leaf.y = -20;
+                }
+                if (leaf.x < -30 || leaf.x > canvas.width + 30) {
+                    leaf.x = Math.random() * canvas.width;
+                }
+            });
+        }
+
+        // Пузырьки на воде (только днём)
+        if (!isNight) {
+            bubbles.forEach(bubble => {
+                ctx.save();
+                ctx.globalAlpha = bubble.opacity;
+                ctx.beginPath();
+                ctx.arc(bubble.x, bubble.y, bubble.r, 0, Math.PI * 2);
+                ctx.fillStyle = "#b3e5fc";
+                ctx.shadowColor = "#fff";
+                ctx.shadowBlur = 10;
+                ctx.fill();
+                ctx.restore();
+
+                bubble.y -= bubble.speed;
+                if (bubble.y < canvas.height * 0.6) {
+                    bubble.x = Math.random() * canvas.width;
+                    bubble.y = canvas.height - (Math.random() * 40);
+                }
+            });
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    // Перегенерировать всё при ресайзе
+    window.addEventListener('resize', () => {
+        generateClouds();
+        generateStars();
+        generateLeaves();
+        generateBubbles();
+    });
+}
+
+// Telegram gift sending button
+document.getElementById('send-gift-btn').addEventListener('click', () => {
+    if (typeof Telegram === 'undefined' || !Telegram.WebApp) {
+        showNotification('Gift sending is available only in Telegram WebApp!', 'error');
+        return;
+    }
+    // Пример: отправляем 100 монет другу (можно сделать выбор подарка)
+    const gift = { type: 'coins', amount: 100 };
+    Telegram.WebApp.sendData(JSON.stringify({ action: 'send_gift', gift }));
+    showNotification('Gift sent! Ask your friend to accept it in their Telegram WebApp.', 'success');
+});
+
+
