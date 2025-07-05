@@ -23,10 +23,10 @@
             <button class="tab-button active" onclick="showTab('tab-game')"><i class="fa-solid fa-cat"></i> Game</button>
             <button class="tab-button" onclick="showTab('tab-shop')"><i class="fas fa-store"></i> Shop</button>
             <button class="tab-button" onclick="showTab('tab-pets')"><i class="fas fa-paw"></i> Pets</button>
-            <button class="tab-button" onclick="showTab('tab-minigames')"><i class="fas fa-gamepad"></i> Mini-games</button>
-            <button class="tab-button" onclick="showTab('tab-achievements')"><i class="fa-solid fa-trophy"></i> Achievements</button>
-            <button class="tab-button" onclick="showTab('tab-rebirth')"><i class="fa-solid fa-star"></i> Rebirth</button>
             <button class="tab-button" onclick="showTab('tab-skins')"><i class="fa-solid fa-brush"></i> Skins</button>
+            <button class="tab-button" onclick="showTab('tab-achievements')"><i class="fa-solid fa-trophy"></i> Achievements</button>
+            <button class="tab-button" onclick="showTab('tab-minigames')"><i class="fas fa-gamepad"></i> Mini-games</button>
+            <button class="tab-button" onclick="showTab('tab-rebirth')"><i class="fa-solid fa-star"></i> Rebirth</button>
         </div>
 
         <div class="tab-content" id="tab-game">
@@ -62,7 +62,7 @@
                         <h4>Powerful click <span id="upgrade-level-display">(Lev. 0)</span></h4>
                         <p>Increases the number of coins per click.</p>
                     </div>
-                    <span class="item-price" id="upgrade-click-price">10</span>
+                    <span class="item-price" id="upgrade-click-price"><i class="fa-solid fa-coins"></i> 10</span>
                     <button class="ui-btn buy-btn" onclick="buyUpgrade('click')"><i class="fa-solid fa-dollar-sign"></i> Buy</button>
                 </div>
                 <div class="upgrade-item" id="upgrade-autoclick-item">
@@ -70,7 +70,7 @@
                         <h4>Autoclick <span id="autoclick-level-display">(Lev. 0)</span></h4>
                         <p>Earn coins every second.</p>
                     </div>
-                    <span class="item-price" id="autoclick-price">50</span>
+                    <span class="item-price" id="autoclick-price"><i class="fa-solid fa-coins"></i> 50</span>
                     <button class="ui-btn buy-btn" onclick="buyUpgrade('autoclick')"><i class="fa-solid fa-dollar-sign"></i> Buy</button>
                 </div>
                 <div class="upgrade-item" id="upgrade-passive-item">
@@ -78,7 +78,7 @@
                         <h4>Passive income <span id="passive-level-display">(Lev. 0)</span></h4>
                         <p>Constantly brings coins.</p>
                     </div>
-                    <span class="item-price" id="passive-price">100</span>
+                    <span class="item-price" id="passive-price"><i class="fa-solid fa-coins"></i> 100</span>
                     <button class="ui-btn buy-btn" onclick="buyUpgrade('passive')"><i class="fa-solid fa-dollar-sign"></i> Buy</button>
                 </div>
             </div>
@@ -87,10 +87,13 @@
         <div class="tab-content" id="tab-pets" style="display:none;">
             <div class="pets-section">
                 <h3>My pets</h3>
-                <div id="pets-list">
+                <div id="my-pets-list" class="pets-list">
+                    <!-- Здесь будут отображаться купленные питомцы (заполняется через JS) -->
                 </div>
-                <div class="shop-section" style="margin-top: 25px;">
-                    <h3>Buy new pets</h3>
+            </div>
+            <div class="pets-section" style="margin-top: 25px;">
+                <h3>Buy new pets</h3>
+                <div id="buy-pets-list" class="list-container pets-list">
                     <div class="pet-item" id="pet-dog-item">
                         <div class="item-info">
                             <h4>Dog</h4>
@@ -99,7 +102,7 @@
                         <span class="item-price"><i class="fa-solid fa-coins"></i> 500</span>
                         <button class="ui-btn buy-btn" onclick="buyPet('dog')"><i class="fas fa-dog"></i> Buy</button>
                     </div>
-                    <div class="pet-item" id="petа-dragon-item">
+                    <div class="pet-item" id="pet-dragon-item">
                         <div class="item-info">
                             <h4>Dragon</h4>
                             <p>Very rare. Increases click strength.</p>
@@ -115,7 +118,7 @@
                         <span class="item-price"><i class="fa-solid fa-coins"></i> 7 500</span>
                         <button class="ui-btn buy-btn" onclick="buyPet('phoenix')"><i class="fas fa-fire"></i> Buy</button>
                     </div>
-                     <div class="pet-item" id="pet-unicorn-item">
+                    <div class="pet-item" id="pet-unicorn-item">
                         <div class="item-info">
                             <h4>Unicorn</h4>
                             <p>Very rare. Increases the chance of rare events (critical clicks).</p>
@@ -275,7 +278,7 @@
         </div>
         </div>
 
-        <button id="send-gift-btn" class="ui-btn"><i class="fa-solid fa-gift"></i> Send Gift to Friend</button>
+        <!--<button id="send-gift-btn" class="ui-btn"><i class="fa-solid fa-gift"></i> Send Gift to Friend</button>-->
     </div>
 
     <canvas id="background-canvas" style="position:fixed; left:0; top:0; width:100vw; height:100vh; z-index:-2; pointer-events:none;"></canvas>

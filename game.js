@@ -198,10 +198,10 @@ function updateUI() {
     }
 
     document.getElementById('upgrade-click-price').textContent = calculateUpgradeCost('click');
-    document.getElementById('upgrade-level-display').textContent = `(Ур. ${upgradeLevel})`;
+    document.getElementById('upgrade-level-display').textContent = `(Lev. ${upgradeLevel})`;
 
     document.getElementById('autoclick-price').textContent = calculateUpgradeCost('autoclick');
-    document.getElementById('autoclick-level-display').textContent = `(Ур. ${autoclickLevel})`;
+    document.getElementById('autoclick-level-display').textContent = `(Lev. ${autoclickLevel})`;
     const autoclickInfo = document.getElementById('autoclick-info');
     if (autoclickLevel > 0) {
         autoclickInfo.textContent = `Auto-click is active. Coins/sec: ${autoclickLevel}`;
@@ -210,7 +210,7 @@ function updateUI() {
     }
     
     document.getElementById('passive-price').textContent = calculateUpgradeCost('passive');
-    document.getElementById('passive-level-display').textContent = `(Ур. ${passiveUpgradeCount})`;
+    document.getElementById('passive-level-display').textContent = `(Lev. ${passiveUpgradeCount})`;
     
     // Обновление UI престижа
     document.getElementById('prestige-points').textContent = prestigePoints;
@@ -225,7 +225,7 @@ function updateUI() {
             prestigeButton.classList.remove('disabled');
         } else {
             prestigeButton.disabled = true;
-            prestigeButton.textContent = `Переродиться (нужен ${PRESTIGE_LEVEL_REQUIREMENT} ур.)`;
+            prestigeButton.textContent = `Переродиться (нужен ${PRESTIGE_LEVEL_REQUIREMENT} lev.)`;
             prestigeButton.classList.add('disabled');
         }
     }
@@ -317,7 +317,7 @@ function buyUpgrade(type) {
                 break;
             case 'autoclick':
                 autoclickLevel++;
-                showNotification(`Автоматический клик улучшен до ур. ${autoclickLevel}!`, 'green');
+                showNotification(`Автоматический клик улучшен до lev. ${autoclickLevel}!`, 'green');
                 break;
             case 'passive':
                 passiveIncome += 1;
@@ -419,7 +419,7 @@ function applyPetBonus() { // Removed specific petType and level args as it reca
 }
 
 function updatePetsUI() {
-    const petsList = document.getElementById('pets-list');
+    const petsList = document.getElementById('my-pets-list');
     petsList.innerHTML = '';
 
     let hasPets = false;
@@ -2005,4 +2005,11 @@ document.getElementById('send-gift-btn').addEventListener('click', () => {
     showNotification('Gift sent! Ask your friend to accept it in their Telegram WebApp.', 'success');
 });
 
+// Пример для background-canvas
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
 
