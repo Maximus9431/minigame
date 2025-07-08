@@ -27,6 +27,7 @@
             <button class="tab-button" onclick="showTab('tab-achievements')"><i class="fa-solid fa-trophy"></i> Achievements</button>
             <button class="tab-button" onclick="showTab('tab-minigames')"><i class="fas fa-gamepad"></i> Mini-games</button>
             <button class="tab-button" onclick="showTab('tab-rebirth')"><i class="fa-solid fa-star"></i> Rebirth</button>
+            <button class="tab-button" onclick="showTab('tab-leaderboard')"><i class="fa-solid fa-crown"></i> Leaderboard</button>
         </div>
 
         <div class="tab-content" id="tab-game">
@@ -100,7 +101,7 @@
                             <p>Increases passive income.</p>
                         </div>
                         <span class="item-price"><i class="fa-solid fa-coins"></i> 500</span>
-                        <button class="ui-btn buy-btn" onclick="buyPet('dog')"><i class="fas fa-dog"></i> Buy</button>
+                        <button class="ui-btn buy-btn" onclick="buyPet('dog')"><i class="fa-solid fa-dollar-sign"></i> Buy</button>
                     </div>
                     <div class="pet-item" id="pet-dragon-item">
                         <div class="item-info">
@@ -108,7 +109,7 @@
                             <p>Very rare. Increases click strength.</p>
                         </div>
                         <span class="item-price"><i class="fa-solid fa-coins"></i> 5 000</span>
-                        <button class="ui-btn buy-btn" onclick="buyPet('dragon')"><i class="fas fa-dragon"></i> Buy</button>
+                        <button class="ui-btn buy-btn" onclick="buyPet('dragon')"><i class="fa-solid fa-dollar-sign"></i> Buy</button>
                     </div>
                     <div class="pet-item" id="pet-phoenix-item">
                         <div class="item-info">
@@ -116,7 +117,7 @@
                             <p>Very rare. Gives a bonus to XP.</p>
                         </div>
                         <span class="item-price"><i class="fa-solid fa-coins"></i> 7 500</span>
-                        <button class="ui-btn buy-btn" onclick="buyPet('phoenix')"><i class="fas fa-fire"></i> Buy</button>
+                        <button class="ui-btn buy-btn" onclick="buyPet('phoenix')"><i class="fa-solid fa-dollar-sign"></i> Buy</button>
                     </div>
                     <div class="pet-item" id="pet-unicorn-item">
                         <div class="item-info">
@@ -124,7 +125,7 @@
                             <p>Very rare. Increases the chance of rare events (critical clicks).</p>
                         </div>
                         <span class="item-price"><i class="fa-solid fa-coins"></i> 10 000</span>
-                        <button class="ui-btn buy-btn" onclick="buyPet('unicorn')"><i class="fa-solid fa-unicorn"></i> Buy</button>
+                        <button class="ui-btn buy-btn" onclick="buyPet('unicorn')"><i class="fa-solid fa-dollar-sign"></i> Buy</button>
                     </div>
                 </div>
             </div>
@@ -198,6 +199,18 @@
             <h3>Your Skins</h3>
             <div id="owned-skins-list" class="shop-section"></div>
         </div>
+
+        <div class="tab-content" id="tab-leaderboard" style="display:none;">
+    <div class="leaderboard-section">
+        <h3>Top 50 Players</h3>
+        <table class="leaderboard-table">
+            <thead>
+                <tr><th>#</th><th>Name</th><th>Score</th></tr>
+            </thead>
+            <tbody id="leaders"></tbody>
+        </table>
+    </div>
+</div>
 
         <div id="settings-overlay" class="modal-overlay">
             <div id="settings-panel" class="modal-content">

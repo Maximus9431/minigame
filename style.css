@@ -1540,7 +1540,7 @@ body.dark-theme #mouse-chase-scene {
 
 /* Список достижений */
 #achievements-list {
-    max-height: 50vh;
+    max-height: 60vh;
     overflow-y: auto;
     padding-right: 8px;
 }
@@ -1550,7 +1550,6 @@ body.dark-theme #mouse-chase-scene {
 #buy-pets-list,
 #skins-shop-list,
 #owned-skins-list,
-#achievements-list,
 #records-section {
     max-height: 40vh;
     overflow-y: auto;
@@ -1666,4 +1665,39 @@ body.dark-theme #mouse-chase-scene {
 @keyframes pulse {
     0% { transform: scale(1); box-shadow: 0 0 15px #FFD70099, 0 4px 16px #ffecb366; }
     100% { transform: scale(1.03); box-shadow: 0 0 25px #FFD700cc, 0 8px 32px #ffecb399; }
+}
+
+.leaderboard-section {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px #0001;
+    padding: 24px 12px;
+    margin: 0 auto;
+    max-width: 500px;
+}
+body.dark-theme .leaderboard-section {
+    background: #23272f;
+    color: #e0e6f0;
+}
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 18px;
+}
+.leaderboard-table th, .leaderboard-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e3e3e3;
+    text-align: left;
+}
+body.dark-theme .leaderboard-table th, 
+body.dark-theme .leaderboard-table td {
+    border-bottom: 1px solid #333a;
+}
+.leaderboard-table th {
+    background: #f5f7fa;
+    color: #2196f3;
+}
+body.dark-theme .leaderboard-table th {
+    background: #23272f;
+    color: #7ee787;
 }

@@ -76,6 +76,8 @@ const rodWidth = 60; // ширина "зоны ловли" удочки
 const rodY = 0; // удочка всегда сверху
 const rodSpeed = 18; // скорость перемещения удочки
 
+let leaderboardInterval = null;
+
 // --- Игровой цикл и основные функции ---
 
 function handleCatClick(event) {
@@ -264,10 +266,31 @@ function showTab(tabId) {
     document.getElementById(tabId).style.display = 'block';
     document.querySelector(`.tab-button[onclick*="${tabId}"]`).classList.add('active');
 
+    // Leaderboard: запускать/останавливать автообновление
+    if (tabId === 'tab-leaderboard') {
+        loadLeaders();
+        leaderboardInterval = setInterval(loadLeaders, 5000);
+    } else {
+        if (leaderboardInterval) {
+            clearInterval(leaderboardInterval);
+            leaderboardInterval = null;
+        }
+    }
+
     if (tabId === 'tab-skins') {
         renderSkinsShop();
         renderOwnedSkins();
     }
+}
+
+async function loadLeaders() {
+    const res = await fetch('/api/leaderboard');
+    const data = await res.json();
+    let html = '';
+    data.forEach((u, i) => {
+        html += `<tr><td>${i+1}</td><td>${u.name}</td><td>${u.score}</td></tr>`;
+    });
+    document.getElementById('leaders').innerHTML = html;
 }
 
 function showNotification(message, type = 'info') {
@@ -1892,6 +1915,7 @@ function startBackgroundAnimation() {
             // День
             const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
             grad.addColorStop(0, "#b3e5fc");
+           
             grad.addColorStop(1, "#e0f7fa");
             ctx.fillStyle = grad;
         }
@@ -1900,6 +1924,7 @@ function startBackgroundAnimation() {
         // Звёзды ночью
         if (isNight) {
             stars.forEach(star => {
+               
                 ctx.save();
                 ctx.globalAlpha = star.opacity * (0.7 + 0.3 * Math.sin(Date.now()/700 + star.x));
                 ctx.beginPath();

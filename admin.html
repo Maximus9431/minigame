@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CatClicker Admin Panel</title>
+    <style>
+        body { background: #181c24; color: #fff; font-family: sans-serif; }
+        h2 { color: #7ee787; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 8px 12px; border-bottom: 1px solid #333; }
+        th { background: #23272f; }
+    </style>
+</head>
+<body>
+    <h2>Online: <span id="online">0</span></h2>
+    <h2>Top 50 players</h2>
+    <table>
+        <thead>
+            <tr><th>#</th><th>Name</th><th>Score</th></tr>
+        </thead>
+        <tbody id="leaders"></tbody>
+    </table>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        socket.on('online', n => {
+            document.getElementById('online').textContent = n;
+        });
+
+        async function loadLeaders() {
+            const res = await fetch('/api/leaderboard');
+            const data = await res.json();
+            let html = '';
+            data.forEach((u, i) => {
+                html += `<tr><td>${i+1}</td><td>${u.name}</td><td>${u.score}</td></tr>`;
+            });
+            document.getElementById('leaders').innerHTML = html;
+        }
+        loadLeaders();
+        setInterval(loadLeaders, 5000);
+    </script>
+</body>
+</html>
