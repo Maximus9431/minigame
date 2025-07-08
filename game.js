@@ -2057,3 +2057,9 @@ canvas.addEventListener('click', function(e) {
         // поймать рыбку!
     }
 });
+
+// Пример JS (game.js или отдельный файл)
+document.getElementById('theme-toggle').addEventListener('change', function() {
+    document.body.classList.toggle('dark-theme', this.checked);
+    // Можно добавить сохранение в localStorage, если нужно
+});
