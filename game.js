@@ -71,6 +71,11 @@ const buySound = new Audio('buy.mp3');
 const levelUpSound = new Audio('level_up.mp3');
 const criticalSound = new Audio('critical_hit.mp3'); // New sound for critical clicks
 
+let rodX = 300; // Начальная позиция удочки (по центру canvas)
+const rodWidth = 60; // ширина "зоны ловли" удочки
+const rodY = 0; // удочка всегда сверху
+const rodSpeed = 18; // скорость перемещения удочки
+
 // --- Игровой цикл и основные функции ---
 
 function handleCatClick(event) {
@@ -2013,3 +2018,42 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
+document.addEventListener('keydown', function(e) {
+    if (document.getElementById('fishing-game').style.display !== 'none') {
+        if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A' ) {
+            rodX = Math.max(rodX - rodSpeed, rodWidth/2);
+        }
+        if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+            rodX = Math.min(rodX + rodSpeed, 600 - rodWidth/2);
+        }
+    }
+});
+
+// Нарисовать удочку
+ctx.save();
+ctx.strokeStyle = "#795548";
+ctx.lineWidth = 6;
+ctx.beginPath();
+ctx.moveTo(rodX, rodY);
+ctx.lineTo(rodX, rodY + 60); // длина удочки
+ctx.stroke();
+// Зона ловли (крючок)
+ctx.beginPath();
+ctx.arc(rodX, rodY + 60, rodWidth/2, 0, Math.PI, true);
+ctx.strokeStyle = "#ffb300";
+ctx.lineWidth = 4;
+ctx.stroke();
+ctx.restore();
+
+canvas.addEventListener('click', function(e) {
+    // ...получить координаты клика...
+    // Вместо проверки по всей рыбке:
+    // if (рыбка под мышкой)
+    // теперь:
+    if (
+        fish.y >= rodY + 60 - fish.radius && fish.y <= rodY + 60 + fish.radius &&
+        Math.abs(fish.x - rodX) < rodWidth/2
+    ) {
+        // поймать рыбку!
+    }
+});
