@@ -384,6 +384,15 @@ function buyPet(petType) {
             return;
         }
 
+        // Удаляем питомца из списка покупки
+        const petItem = document.getElementById(`pet-${petType}-item`);
+        if (petItem) {
+            petItem.remove();
+        }
+
+        // Проверяем, куплены ли все питомцы
+        checkIfAllPetsBought();
+
         coins -= cost;
         petLevels[petType] = 1;
         applyPetBonus(petType, 1);
@@ -391,10 +400,23 @@ function buyPet(petType) {
         playBuySound();
         vibrate(100);
         updateUI();
+        updatePetsUI();
         saveGame();
         checkAchievements('petPurchase'); // Добавлено
     } else {
         showNotification('Недостаточно монет для покупки питомца!', 'error');
+    }
+}
+
+// Проверка наличия всех питомцев
+function checkIfAllPetsBought() {
+    const petTypes = ['dog', 'dragon', 'phoenix', 'unicorn'];
+    const allBought = petTypes.every(pet => petLevels[pet] > 0);
+    
+    const messageElement = document.getElementById('all-pets-bought-message');
+    if (allBought && messageElement) {
+        messageElement.style.display = 'block';
+        showNotification("Congratulations! You've bought all pets!", 'success');
     }
 }
 
@@ -1480,6 +1502,24 @@ function loadGame() {
         showNotification('There are no saved games to load.', 'warning');
     }
     updateUI();
+    updatePetsUI();
+    updateBuyPetsUI();
+    checkIfAllPetsBought();
+    checkIfAllSkinsBought();
+}
+
+function updateBuyPetsUI() {
+    const buyList = document.getElementById('buy-pets-list');
+    const petTypes = ['dog', 'dragon', 'phoenix', 'unicorn'];
+    
+    petTypes.forEach(petType => {
+        if (petLevels[petType] && petLevels[petType] > 0) {
+            const petItem = document.getElementById(`pet-${petType}-item`);
+            if (petItem) {
+                petItem.remove();
+            }
+        }
+    });
 }
 
 function resetGameConfirmation() {
@@ -1517,10 +1557,97 @@ function resetGame() {
     document.getElementById('vibration-toggle').checked = true;
     document.getElementById('theme-toggle').checked = true; // Reset to light theme
 
+    const messageElement = document.getElementById('all-pets-bought-message');
+    if (messageElement) {
+        messageElement.style.display = 'none';
+    }
+
+    const skinsMessage = document.getElementById('all-skins-bought-message');
+    if (skinsMessage) {
+        skinsMessage.style.display = 'none';
+    }
+        
+    // Восстанавливаем питомцев в магазине
+    restorePetsInShop();
+
     applyTheme('light'); // Apply light theme after reset
     showNotification('Игра сброшена!', 'error');
     updateUI();
     saveGame();
+}
+
+function restoreSkinsInShop() {
+    renderSkinsShop();
+}
+
+// Восстановление питомцев в магазине
+function restorePetsInShop() {
+    const buyPetsList = document.getElementById('buy-pets-list');
+    const petTypes = ['dog', 'dragon', 'phoenix', 'unicorn'];
+    
+    // Удаляем текущие элементы
+    buyPetsList.innerHTML = '';
+    
+    // Добавляем всех питомцев обратно
+    petTypes.forEach(petType => {
+        const petItem = createPetItem(petType);
+        buyPetsList.appendChild(petItem);
+    });
+    
+    // Добавляем сообщение (скрытое)
+    const message = document.createElement('div');
+    message.id = 'all-pets-bought-message';
+    message.style.display = 'none';
+    message.style.textAlign = 'center';
+    message.style.padding = '20px';
+    message.style.color = '#777';
+    message.textContent = "You have bought all pets! 🎉";
+    buyPetsList.appendChild(message);
+}
+
+// Создание элемента питомца для магазина
+function createPetItem(petType) {
+    const petItem = document.createElement('div');
+    petItem.className = 'pet-item';
+    petItem.id = `pet-${petType}-item`;
+    
+    // Определяем стоимость и описание для каждого типа
+    let cost, name, description;
+    switch(petType) {
+        case 'dog':
+            cost = 500;
+            name = "Dog";
+            description = "Increases passive income.";
+            break;
+        case 'dragon':
+            cost = 5000;
+            name = "Dragon";
+            description = "Very rare. Increases click strength.";
+            break;
+        case 'phoenix':
+            cost = 7500;
+            name = "Phoenix";
+            description = "Very rare. Gives a bonus to XP.";
+            break;
+        case 'unicorn':
+            cost = 10000;
+            name = "Unicorn";
+            description = "Very rare. Increases the chance of rare events (critical clicks).";
+            break;
+    }
+    
+    petItem.innerHTML = `
+        <div class="item-info">
+            <h4>${name}</h4>
+            <p>${description}</p>
+        </div>
+        <span class="item-price"><i class="fa-solid fa-coins"></i> ${cost.toLocaleString()}</span>
+        <button class="ui-btn buy-btn" onclick="buyPet('${petType}')">
+            <i class="fa-solid fa-dollar-sign"></i> Buy
+        </button>
+    `;
+    
+    return petItem;
 }
 
 function performPrestige() {
@@ -1772,6 +1899,9 @@ document.addEventListener('DOMContentLoaded', () => {
     updateUI();
 
     updateCatSkin(); // <-- Добавь вызов после updateUI()
+
+    renderSkinsShop();
+    renderOwnedSkins();
 });
 
 // --- Скины ---
@@ -1796,8 +1926,19 @@ function saveSkins() {
 function renderSkinsShop() {
     const shop = document.getElementById('skins-shop-list');
     shop.innerHTML = '';
-    allSkins.forEach(skin => {
-        if (ownedSkins.includes(skin.id)) return;
+    
+    const availableSkins = allSkins.filter(skin => 
+        !ownedSkins.includes(skin.id) && 
+        skin.id !== 'cat1' && 
+        skin.id !== 'mouse1' && 
+        skin.id !== 'fish1' // Исключаем базовые скины
+    );
+    
+    if (availableSkins.length === 0) {
+        return; // Магазин будет пустым, покажем сообщение отдельно
+    }
+    
+    availableSkins.forEach(skin => {
         const div = document.createElement('div');
         div.className = 'upgrade-item';
         div.innerHTML = `
@@ -1846,6 +1987,18 @@ function buySkin(id) {
     updateUI();
     renderSkinsShop();
     renderOwnedSkins();
+    checkIfAllSkinsBought();
+}
+
+// Проверка наличия всех скинов
+function checkIfAllSkinsBought() {
+    const allBought = allSkins.every(skin => ownedSkins.includes(skin.id));
+    
+    const messageElement = document.getElementById('all-skins-bought-message');
+    if (allBought && messageElement) {
+        messageElement.style.display = 'block';
+        showNotification("Congratulations! You've bought all skins!", 'success');
+    }
 }
 
 function selectSkin(type, id) {

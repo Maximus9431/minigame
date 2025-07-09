@@ -127,6 +127,10 @@
                         <span class="item-price"><i class="fa-solid fa-coins"></i> 10 000</span>
                         <button class="ui-btn buy-btn" onclick="buyPet('unicorn')"><i class="fa-solid fa-dollar-sign"></i> Buy</button>
                     </div>
+            <!-- Добавим сообщение о покупке всех питомцев (изначально скрыто) -->
+                    <div id="all-pets-bought-message" style="display: none; text-align: center; padding: 20px; color: #777;">
+                        You have bought all pets! 🎉
+                    </div>
                 </div>
             </div>
         </div>
@@ -195,7 +199,12 @@
 
         <div class="tab-content" id="tab-skins" style="display:none;">
             <h2><i class="fa-solid fa-brush"></i> Skins Shop</h2>
-            <div id="skins-shop-list" class="shop-section"></div>
+            <div id="skins-shop-container">
+                <div id="skins-shop-list" class="shop-section"></div>
+                <div id="all-skins-bought-message" style="display: none; text-align: center; padding: 20px; color: #777;">
+                    You have bought all skins! 🎉
+                </div>
+            </div>
             <h3>Your Skins</h3>
             <div id="owned-skins-list" class="shop-section"></div>
         </div>

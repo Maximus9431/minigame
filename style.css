@@ -1709,3 +1709,37 @@ body.dark-theme .leaderboard-table th {
     background: #23272f;
     color: #7ee787;
 }
+
+/* Добавим анимацию для сообщения о покупке всех питомцев */
+#all-pets-bought-message {
+    animation: celebrate 2s infinite alternate;
+}
+
+@keyframes celebrate {
+    0% {
+        transform: scale(1);
+        color: #777;
+    }
+    100% {
+        transform: scale(1.05);
+        color: #ff9800;
+        text-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+    }
+}
+
+/* Добавим анимацию для сообщения о покупке всех скинов */
+#all-skins-bought-message {
+    animation: celebrate 2s infinite alternate;
+}
+
+@keyframes celebrate {
+    0% {
+        transform: scale(1);
+        color: #777;
+    }
+    100% {
+        transform: scale(1.05);
+        color: #ff9800;
+        text-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+    }
+}
