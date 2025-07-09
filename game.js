@@ -142,9 +142,9 @@ function handleCatClick(event) {
     coinElement.classList.add('coin-float');
     if (isCritical) {
         coinElement.classList.add('critical-float'); // Add class for critical float style
-        coinElement.textContent = `+${Math.round(earnedCoins)} CRIT!`;
+        coinElement.textContent = `+${formatNumber(Math.round(earnedCoins))} CRIT!`;
     } else {
-        coinElement.textContent = `+${Math.round(earnedCoins)}`;
+        coinElement.textContent = `+${formatNumber(Math.round(earnedCoins))}`;
     }
 
     const catArea = document.getElementById('cat-area');
@@ -190,24 +190,24 @@ function gameTick() {
 // --- Функции UI и обновления ---
 
 function updateUI() {
-    document.getElementById('coins').textContent = Math.floor(coins);
-    document.getElementById('level').textContent = level;
+    document.getElementById('coins').textContent = formatNumber(Math.floor(coins));
+    document.getElementById('level').textContent = formatNumber(level);
 
     const xpRequired = xpToNextLevel();
     const xpBar = document.getElementById('xp-bar');
     const xpBarText = document.getElementById('xp-bar-text');
     let xpPercentage = (xp / xpRequired) * 100;
     xpBar.style.width = `${xpPercentage}%`;
-    xpBarText.textContent = `XP: ${xp}/${xpRequired}`;
+    xpBarText.textContent = `XP: ${formatNumber(xp)}/${formatNumber(xpRequired)}`;
 
     if (xp >= xpRequired) {
         levelUp();
     }
 
-    document.getElementById('upgrade-click-price').textContent = calculateUpgradeCost('click');
+    document.getElementById('upgrade-click-price').textContent = formatNumber(calculateUpgradeCost('click'));
     document.getElementById('upgrade-level-display').textContent = `(Lev. ${upgradeLevel})`;
 
-    document.getElementById('autoclick-price').textContent = calculateUpgradeCost('autoclick');
+    document.getElementById('autoclick-price').textContent = formatNumber(calculateUpgradeCost('autoclick'));
     document.getElementById('autoclick-level-display').textContent = `(Lev. ${autoclickLevel})`;
     const autoclickInfo = document.getElementById('autoclick-info');
     if (autoclickLevel > 0) {
@@ -216,11 +216,11 @@ function updateUI() {
         autoclickInfo.textContent = 'Buy an autoclicker at the shop!';
     }
     
-    document.getElementById('passive-price').textContent = calculateUpgradeCost('passive');
+    document.getElementById('passive-price').textContent = formatNumber(calculateUpgradeCost('passive'));
     document.getElementById('passive-level-display').textContent = `(Lev. ${passiveUpgradeCount})`;
     
     // Обновление UI престижа
-    document.getElementById('prestige-points').textContent = prestigePoints;
+    document.getElementById('prestige-points').textContent = formatNumber(prestigePoints);
     document.getElementById('prestige-multiplier').textContent = prestigeMultiplier.toFixed(2);
     document.getElementById('prestige-req-level').textContent = PRESTIGE_LEVEL_REQUIREMENT;
 
@@ -298,6 +298,12 @@ function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.classList.add('notification-message');
     notification.textContent = message;
+
+    // Форматируем числа в сообщениях
+    message = message.replace(/\d+/g, (match) => {
+        const num = parseInt(match);
+        return num >= 1000 ? formatNumber(num) : num;
+    });
 
     if (type === 'error') {
         notification.style.backgroundColor = 'rgba(220, 53, 69, 0.8)';
@@ -1010,7 +1016,7 @@ function endFishingGame() {
     const finalBonus = fishingScore * 2;
     coins += finalBonus;
     xp += fishingScore;
-    showNotification(`Fishing is over! You earned ${fishingScore} points & ${finalBonus} coins!`, 'success');
+    showNotification(`Fishing is over! You earned ${formatNumber(fishingScore)} points & ${formatNumber(finalBonus)} coins!`, 'success');
     
     // Update high score for fishing
     fishingHighScores.push(fishingScore);
@@ -1354,7 +1360,7 @@ function endJumpGame(score) {
     const finalBonus = score * 5;
     coins += finalBonus;
     xp += score * 2;
-    showNotification(`The jumps are over! You scored ${score} points & earned ${finalBonus} coins!`, 'success');
+    showNotification(`The jumps are over! You scored ${formatNumber(score)} points & earned ${formatNumber(finalBonus)} coins!`, 'success');
 
     // Update high score for jump
     if (!window.jumpHighScore || score > window.jumpHighScore) {
@@ -1703,6 +1709,58 @@ document.addEventListener('DOMContentLoaded', () => {
             const tabId = button.getAttribute('onclick').match(/'(.*)'/)[1];
             showTab(tabId);
         });
+    });
+
+// Добавляем перетаскивание для вкладок
+    const tabsContainer = document.querySelector('.tabs');
+    let isDragging = false;
+    let startX;
+    let scrollLeft;
+
+    tabsContainer.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        tabsContainer.classList.add('dragging');
+        startX = e.pageX - tabsContainer.offsetLeft;
+        scrollLeft = tabsContainer.scrollLeft;
+    });
+
+    tabsContainer.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX - tabsContainer.offsetLeft;
+        const walk = (x - startX) * 2; // Чувствительность прокрутки
+        tabsContainer.scrollLeft = scrollLeft - walk;
+    });
+
+    tabsContainer.addEventListener('mouseup', () => {
+        isDragging = false;
+        tabsContainer.classList.remove('dragging');
+    });
+
+    tabsContainer.addEventListener('mouseleave', () => {
+        isDragging = false;
+        tabsContainer.classList.remove('dragging');
+    });
+
+    // Для сенсорных устройств
+    tabsContainer.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        tabsContainer.classList.add('dragging');
+        startX = e.touches[0].pageX - tabsContainer.offsetLeft;
+        scrollLeft = tabsContainer.scrollLeft;
+    });
+
+    tabsContainer.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.touches[0].pageX - tabsContainer.offsetLeft;
+        const walk = (x - startX) * 2;
+        tabsContainer.scrollLeft = scrollLeft - walk;
+    });
+
+    tabsContainer.addEventListener('touchend', () => {
+        isDragging = false;
+        tabsContainer.classList.remove('dragging');
     });
 
     showTab('tab-game');
@@ -2088,3 +2146,8 @@ document.getElementById('theme-toggle').addEventListener('change', function() {
     document.body.classList.toggle('dark-theme', this.checked);
     // Можно добавить сохранение в localStorage, если нужно
 });
+
+// ===== ДОБАВИМ НОВУЮ ФУНКЦИЮ ДЛЯ ФОРМАТИРОВАНИЯ ЧИСЕЛ =====
+function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}

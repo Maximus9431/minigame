@@ -109,6 +109,9 @@ h1 {
 .tabs {
     display: flex;
     overflow-x: auto;
+    /*scroll-behavior: smooth;*/
+    -webkit-overflow-scrolling: touch;
+    cursor: grab;
     gap: 12px;
     margin-bottom: 24px;
     padding: 12px 10px 12px 10px;
@@ -117,13 +120,18 @@ h1 {
     background: transparent;
 }
 
+.tabs.dragging {
+    cursor: grabbing;
+    user-select: none;
+}
+
 .tabs::-webkit-scrollbar {
-    height: 8px; /* Высота скроллбара */
+    height: 6px; /* Высота скроллбара */
 }
 
 .tabs::-webkit-scrollbar-track {
-    background: #f1f1f1; /* Цвет фона скроллбара */
-    border-radius: 10px;
+    background: rgba(33,150,243,0.3);
+    border-radius: 3px;
 }
 
 .tabs::-webkit-scrollbar-thumb {
@@ -132,7 +140,7 @@ h1 {
 }
 
 .tabs::-webkit-scrollbar-thumb:hover {
-    background: #555; /* Цвет ползунка при наведении */
+    background: rgba(33,150,243,0.5); /* Цвет ползунка при наведении */
 }
 
 .tab-button {
