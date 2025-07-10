@@ -62,9 +62,9 @@ const prestigeSound = new Audio('prestige.mp3'); // Создайте этот ф
 
 let wallpapers = [
     { id: 'default', name: 'Default', price: 0, image: '', owned: true },
-    { id: 'space', name: 'Space', price: 500, image: 'wallpapers/space.jpg', owned: false },
-    { id: 'forest', name: 'Forest', price: 700, image: 'wallpapers/forest.jpg', owned: false },
-    { id: 'sunset', name: 'Sunset', price: 900, image: 'wallpapers/sunset.jpg', owned: false }
+    { id: 'space', name: 'Space', price: 10000, image: 'wallpapers/space.jpg', owned: false },
+    { id: 'forest', name: 'Forest', price: 50000, image: 'wallpapers/forest.jpg', owned: false },
+    { id: 'sunset', name: 'Sunset', price: 100000, image: 'wallpapers/sunset.jpg', owned: false }
 ];
 let currentWallpaper = 'default';
 

@@ -485,7 +485,6 @@ h1 {
 
 /* Разделы магазина/улучшений/питомцев */
 .shop-section, .pets-section, .mini-games-section {
-    margin-top: 25px;
     padding: 20px;
     background: #fdfdfd;
     border-radius: 15px;
