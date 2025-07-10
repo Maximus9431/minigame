@@ -22,6 +22,7 @@
         <div class="tabs">
             <button class="tab-button active" onclick="showTab('tab-game')"><i class="fa-solid fa-cat"></i> Game</button>
             <button class="tab-button" onclick="showTab('tab-shop')"><i class="fas fa-store"></i> Shop</button>
+            <button class="tab-button" onclick="showTab('tab-wallpapers')"><i class="fa-solid fa-image"></i> Wallpapers</button>
             <button class="tab-button" onclick="showTab('tab-pets')"><i class="fas fa-paw"></i> Pets</button>
             <button class="tab-button" onclick="showTab('tab-skins')"><i class="fa-solid fa-brush"></i> Skins</button>
             <button class="tab-button" onclick="showTab('tab-achievements')"><i class="fa-solid fa-trophy"></i> Achievements</button>
@@ -85,6 +86,13 @@
             </div>
         </div>
 
+        <div class="tab-content" id="tab-wallpapers" style="display:none;">
+            <div class="shop-section">
+                <h3>Wallpapers</h3>
+                <div id="wallpaper-list"></div>
+            </div>
+        </div>
+        
         <div class="tab-content" id="tab-pets" style="display:none;">
             <div class="pets-section">
                 <h3>My pets</h3>
@@ -210,16 +218,16 @@
         </div>
 
         <div class="tab-content" id="tab-leaderboard" style="display:none;">
-    <div class="leaderboard-section">
-        <h3>Top 50 Players</h3>
-        <table class="leaderboard-table">
-            <thead>
-                <tr><th>#</th><th>Name</th><th>Score</th></tr>
-            </thead>
-            <tbody id="leaders"></tbody>
-        </table>
-    </div>
-</div>
+        <div class="leaderboard-section">
+            <h3>Top 50 Players</h3>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr><th>#</th><th>Name</th><th>Score</th></tr>
+                        </thead>
+                    <tbody id="leaders"></tbody>
+                </table>
+            </div>
+        </div>
 
         <div id="settings-overlay" class="modal-overlay">
             <div id="settings-panel" class="modal-content">

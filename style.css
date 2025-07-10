@@ -24,6 +24,9 @@ body {
     font-family: 'Montserrat', sans-serif;
     color: #333;
     transition: background 0.5s, color 0.3s;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 /* Эффект "облаков" и свечения */
@@ -1742,4 +1745,14 @@ body.dark-theme .leaderboard-table th {
         color: #ff9800;
         text-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
     }
+}
+
+.wallpaper-preview {
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.wallpaper-preview:hover {
+    transform: scale(1.01);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.3);
 }

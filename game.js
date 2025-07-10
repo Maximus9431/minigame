@@ -60,6 +60,14 @@ const PRESTIGE_LEVEL_REQUIREMENT = 100; // Требуемый уровень д�
 const PRESTIGE_POINTS_PER_LEVEL = 1; // Сколько очков престижа дается за каждые 10 уровней выше требования
 const prestigeSound = new Audio('prestige.mp3'); // Создайте этот файл звука!
 
+let wallpapers = [
+    { id: 'default', name: 'Default', price: 0, image: '', owned: true },
+    { id: 'space', name: 'Space', price: 500, image: 'wallpapers/space.jpg', owned: false },
+    { id: 'forest', name: 'Forest', price: 700, image: 'wallpapers/forest.jpg', owned: false },
+    { id: 'sunset', name: 'Sunset', price: 900, image: 'wallpapers/sunset.jpg', owned: false }
+];
+let currentWallpaper = 'default';
+
 // Local High Scores for Mini-games
 let fishingHighScores = [];
 let jumpHighScores = [];
@@ -280,6 +288,10 @@ function showTab(tabId) {
     if (tabId === 'tab-skins') {
         renderSkinsShop();
         renderOwnedSkins();
+    }
+
+    if (tabId === 'tab-wallpapers') {
+    renderWallpaperShop();
     }
 }
 
@@ -1506,6 +1518,7 @@ function loadGame() {
     updateBuyPetsUI();
     checkIfAllPetsBought();
     checkIfAllSkinsBought();
+    applyWallpaper(currentWallpaper);
 }
 
 function updateBuyPetsUI() {
@@ -2303,4 +2316,54 @@ document.getElementById('theme-toggle').addEventListener('change', function() {
 // ===== ДОБАВИМ НОВУЮ ФУНКЦИЮ ДЛЯ ФОРМАТИРОВАНИЯ ЧИСЕЛ =====
 function formatNumber(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function renderWallpaperShop() {
+    const list = document.getElementById('wallpaper-list');
+    list.innerHTML = '';
+
+    wallpapers.forEach(w => {
+        const div = document.createElement('div');
+        div.className = 'upgrade-item wallpaper-preview';
+        div.style.backgroundImage = `url(${w.image})`;
+        div.style.backgroundSize = 'cover';
+        div.style.backgroundPosition = 'center';
+        div.style.color = '#fff'; // Белый текст для контраста
+        div.innerHTML = `
+            <div class="item-info" style="background: rgba(0,0,0,0); padding: 10px; border-radius: 12px;">
+                <h4>${w.name}</h4>
+                <p>${w.owned ? 'Owned' : `Price: ${w.price} coins`}</p>
+            </div>
+            <button class="ui-btn buy-btn" onclick="${w.owned ? `applyWallpaper('${w.id}')` : `buyWallpaper('${w.id}')`}">
+                <i class="fa-solid fa-image"></i> ${w.owned ? 'Apply' : 'Buy'}
+            </button>
+        `;
+        list.appendChild(div);
+    });
+}
+
+function buyWallpaper(id) {
+    const wp = wallpapers.find(w => w.id === id);
+    if (!wp || wp.owned) return;
+
+    if (coins >= wp.price) {
+        coins -= wp.price;
+        wp.owned = true;
+        showNotification(`Wallpaper "${wp.name}" purchased!`, 'success');
+        applyWallpaper(id);
+        playBuySound();
+        updateUI();
+        saveGame();
+    } else {
+        showNotification('Not enough coins!', 'error');
+    }
+}
+
+function applyWallpaper(id) {
+    currentWallpaper = id;
+    const wp = wallpapers.find(w => w.id === id);
+    document.body.style.backgroundImage = wp?.image ? `url(${wp.image})` : '';
+    document.body.style.backgroundSize = 'cover';
+    showNotification(`Applied wallpaper: ${wp.name}`, 'green');
+    renderWallpaperShop();
 }
