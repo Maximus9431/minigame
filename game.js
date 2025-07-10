@@ -2247,26 +2247,6 @@ function startBackgroundAnimation() {
     });
 }
 
-// Telegram gift sending button
-document.getElementById('send-gift-btn').addEventListener('click', () => {
-    if (typeof Telegram === 'undefined' || !Telegram.WebApp) {
-        showNotification('Gift sending is available only in Telegram WebApp!', 'error');
-        return;
-    }
-    // Пример: отправляем 100 монет другу (можно сделать выбор подарка)
-    const gift = { type: 'coins', amount: 100 };
-    Telegram.WebApp.sendData(JSON.stringify({ action: 'send_gift', gift }));
-    showNotification('Gift sent! Ask your friend to accept it in their Telegram WebApp.', 'success');
-});
-
-// Пример для background-canvas
-function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resize);
-resize();
-
 document.addEventListener('keydown', function(e) {
     if (document.getElementById('fishing-game').style.display !== 'none') {
         if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A' ) {
