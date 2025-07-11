@@ -22,8 +22,6 @@ let fishingTimerCountdown = null;
 let fishSpawnCount = 0;
 let passiveIncome = 0;
 let passiveUpgradeCount = 0;
-let lastRewardDate = null;
-let streak = 0;
 let petLevels = {}; // Объект для хранения уровней питомцев: { 'dog': 1, 'dragon': 0 }
 let upgradeLevel = 1;
 let currentTheme = 'light'; // 'light' or 'dark'
@@ -64,15 +62,15 @@ let wallpapers = [
     { id: 'default', name: 'Default', price: 0, image: '', owned: true },
     { id: 'space', name: 'Space', price: 10000, image: 'wallpapers/space.jpg', owned: false },
     { id: 'forest', name: 'Forest', price: 50000, image: 'wallpapers/forest.jpg', owned: false },
-    { id: 'sunset', name: 'Sunset', price: 100000, image: 'wallpapers/sunset.jpg', owned: false }
+    { id: 'sunset', name: 'Sunset', price: 100000, image: 'wallpapers/sunset.jpg', owned: false },
+    { id: 'cosmos', name: 'Cosmos', price: 150000, image: 'wallpapers/cosmos.jpg', owned: false },
+    { id: 'desert', name: 'Desert', price: 110000, image: 'wallpapers/desert.jpg', owned: false }
 ];
 let currentWallpaper = 'default';
 
 // Local High Scores for Mini-games
 let fishingHighScores = [];
 let jumpHighScores = [];
-
-const dailyRewards = [50, 100, 150, 200, 300, 500, 1000];
 
 const clickSound = new Audio('meow.mp3');
 const buySound = new Audio('buy.mp3');
@@ -612,51 +610,6 @@ function getPetLevelUpCost(petType) {
     const baseCost = 100;
     const currentLevel = petLevels[petType] || 0;
     return baseCost * (currentLevel + 1);
-}
-
-
-// --- Ежедневные награды ---
-
-function checkDailyReward() {
-    const today = new Date().toDateString();
-    const dailyRewardBtn = document.getElementById('daily-reward-btn');
-
-    if (lastRewardDate === today) {
-        showNotification("You have already claimed today's reward!");
-        dailyRewardBtn.disabled = true; // Disable button if already claimed
-        return;
-    } else {
-        dailyRewardBtn.disabled = false; // Enable button if not claimed
-        dailyRewardBtn.classList.add('glow');
-    }
-
-    dailyRewardBtn.onclick = () => {
-        let currentStreak = 0;
-        if (lastRewardDate) {
-            const lastDate = new Date(lastRewardDate);
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-
-            if (lastDate.toDateString() === yesterday.toDateString()) {
-                currentStreak = streak + 1;
-            } else {
-                currentStreak = 1;
-            }
-        } else {
-            currentStreak = 1;
-        }
-
-        streak = Math.min(currentStreak, dailyRewards.length);
-        const reward = dailyRewards[streak - 1];
-        coins += reward;
-        lastRewardDate = today;
-        showNotification(`Daily reward: ${reward} coins! Streak: ${streak}/7`, 'green');
-        dailyRewardBtn.classList.remove('glow');
-        dailyRewardBtn.disabled = true; // Disable after claiming
-        dailyRewardBtn.onclick = null; // Remove onclick handler
-        saveGame();
-        updateUI();
-    };
 }
 
 function initializeAchievements() {
@@ -1907,8 +1860,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setInterval(gameTick, 1000);
 
-    checkDailyReward();
-
     updateUI();
 
     updateCatSkin(); // <-- Добавь вызов после updateUI()
@@ -2347,3 +2298,26 @@ function applyWallpaper(id) {
     showNotification(`Applied wallpaper: ${wp.name}`, 'green');
     renderWallpaperShop();
 }
+
+// Цвет заголовка CatClicker
+function initHeaderColorPicker() {
+    const dots = document.querySelectorAll('.color-dot');
+    const title = document.getElementById('title-text');
+
+    // Apply saved color
+    const savedColor = localStorage.getItem('headerColor');
+    if (savedColor && title) {
+        title.style.color = savedColor;
+    }
+
+    dots.forEach(dot => {
+        dot.addEventListener('click', () => {
+            const selectedColor = dot.getAttribute('data-color');
+            title.style.color = selectedColor;
+            localStorage.setItem('headerColor', selectedColor);
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initHeaderColorPicker);
+

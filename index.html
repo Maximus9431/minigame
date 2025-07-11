@@ -14,9 +14,10 @@
 <body>
     <div id="main">
         <h1>
-          CatClicker
-          <span id="settings-btn" style="cursor:pointer; margin-left:8px; font-size:0.9em;" title="Настройки">
-            <i class="fa-solid fa-paw"></i> </span>
+        <span id="title-text">CatClicker</span>
+        <span id="settings-btn" style="cursor:pointer; margin-left:8px; font-size:0.9em;" title="Настройки">
+            <i class="fa-solid fa-paw"></i>
+        </span>
         </h1>
 
         <div class="tabs">
@@ -49,9 +50,6 @@
             </div>
             <p id="xp-bar-text">XP: 0/10</p>
         </div>
-            <div class="daily-reward-section">
-                <button id="daily-reward-btn" class="ui-btn"><i class="fas fa-gift"></i> Daily reward</button>
-            </div>
             <div id="autoclick-info" style="text-align: center; margin-top: 15px; font-size: 0.9em; color: #666;">
             </div>
         </div>
@@ -89,7 +87,7 @@
         <div class="tab-content" id="tab-wallpapers" style="display:none;">
             <div class="shop-section">
                 <h3>Wallpapers</h3>
-                <div id="wallpaper-list"></div>
+                <div id="wallpaper-list" class="scrollable-list"></div>
             </div>
         </div>
         
@@ -255,6 +253,19 @@
                         <label class="switch theme-switch">
                             <input type="checkbox" id="theme-toggle" checked> <span class="slider round"></span>
                         </label>
+                    </div>
+                    <div class="setting-category">
+                    <h3>Header Color (soon)</h3>
+                    <div id="color-picker" class="color-circle">
+                        <span class="color-dot" style="background-color: #2196F3;" data-color="#2196F3"></span>
+                        <span class="color-dot" style="background-color: #E91E63;" data-color="#E91E63"></span>
+                        <span class="color-dot" style="background-color: #FF9800;" data-color="#FF9800"></span>
+                        <span class="color-dot" style="background-color: #4CAF50;" data-color="#4CAF50"></span>
+                        <span class="color-dot" style="background-color: #9C27B0;" data-color="#9C27B0"></span>
+                        <span class="color-dot" style="background-color: #3F51B5;" data-color="#3F51B5"></span>
+                        <span class="color-dot" style="background-color: #000000;" data-color="#000000"></span>
+                        <span class="color-dot" style="background-color: #ffffff; border: 1px solid #ccc;" data-color="#ffffff"></span>
+                    </div>
                     </div>
                 </div>
 

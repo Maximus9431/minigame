@@ -876,7 +876,7 @@ input:checked + .slider:before {
 }
 
 /* Daily Reward Button Glow */
-.daily-reward-section .ui-btn.glow {
+.ui-btn.glow {
     animation: pulse 1.5s infinite alternate;
     border: 2px solid #FFD700; /* Gold border */
     box-shadow: 0 0 15px rgba(255,215,0,0.7);
@@ -1723,7 +1723,7 @@ body.dark-theme .leaderboard-table th {
         color: #777;
     }
     100% {
-        transform: scale(1.05);
+        transform: scale(1);
         color: #ff9800;
         text-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
     }
@@ -1740,7 +1740,7 @@ body.dark-theme .leaderboard-table th {
         color: #777;
     }
     100% {
-        transform: scale(1.05);
+        transform: scale(1);
         color: #ff9800;
         text-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
     }
@@ -1755,3 +1755,45 @@ body.dark-theme .leaderboard-table th {
     transform: scale(1.01);
     box-shadow: 0 8px 18px rgba(0,0,0,0.3);
 }
+
+.color-circle {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.color-dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.color-dot:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+.scrollable-list {
+    max-height: 450px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.scrollable-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollable-list::-webkit-scrollbar-thumb {
+    background-color: rgba(128, 128, 128, 0.4);
+    border-radius: 3px;
+}
+
+.scrollable-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
