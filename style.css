@@ -1797,3 +1797,6 @@ body.dark-theme .leaderboard-table th {
     background: transparent;
 }
 
+#title-text {
+    transition: color 0.3s ease;
+}

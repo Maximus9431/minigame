@@ -94,7 +94,7 @@
         <div class="tab-content" id="tab-pets" style="display:none;">
             <div class="pets-section">
                 <h3>My pets</h3>
-                <div id="my-pets-list" class="pets-list">
+                <div id="my-pets-list" class="pets-list scrollable-list">
                     <!-- Здесь будут отображаться купленные питомцы (заполняется через JS) -->
                 </div>
             </div>
@@ -185,7 +185,7 @@
 
         <div class="tab-content" id="tab-achievements" style="display: none;">
             <h2 style="text-align: center;"><i class="fa-solid fa-trophy"></i> Achievements</h2>
-            <div id="achievements-list" class="list-container">
+            <div id="achievements-list" class="list-container scrollable-list">
                 <p style="text-align: center; color: #777;">Loading achievements...</p>
             </div>
         </div>
@@ -204,17 +204,24 @@
         </div>
 
         <div class="tab-content" id="tab-skins" style="display:none;">
-            <h2 style="text-align: center;"><i class="fa-solid fa-brush"></i> Skins Shop</h2>
-            <div id="skins-shop-container">
-                <div id="skins-shop-list" class="shop-section"></div>
+            <div class="pets-section">
+                <h3>Your skins</h3>
+                <div id="owned-skins-list" class="pets-list scrollable-list">
+                    <!-- Сюда добавляются купленные скины -->
+                </div>
+            </div>
+
+            <div class="pets-section" style="margin-top: 25px;">
+                <h3>Buy new skins</h3>
+                <div id="skins-shop-list" class="list-container pets-list">
+                    <!-- Сюда добавляются доступные для покупки скины -->
+                </div>
                 <div id="all-skins-bought-message" style="display: none; text-align: center; padding: 20px; color: #777;">
                     You have bought all skins! 🎉
                 </div>
             </div>
-            <h3 style="text-align: center;"><i class="fa-solid fa-brush"></i> Your Skins</h3>
-            <div id="owned-skins-list" class="shop-section"></div>
         </div>
-
+   
         <div class="tab-content" id="tab-leaderboard" style="display:none;">
         <div class="leaderboard-section">
             <h3 style="text-align: center;">Top 50 Players</h3>
@@ -255,17 +262,11 @@
                         </label>
                     </div>
                     <div class="setting-category">
-                    <h3>Header Color (soon)</h3>
-                    <div id="color-picker" class="color-circle">
-                        <span class="color-dot" style="background-color: #2196F3;" data-color="#2196F3"></span>
-                        <span class="color-dot" style="background-color: #E91E63;" data-color="#E91E63"></span>
-                        <span class="color-dot" style="background-color: #FF9800;" data-color="#FF9800"></span>
-                        <span class="color-dot" style="background-color: #4CAF50;" data-color="#4CAF50"></span>
-                        <span class="color-dot" style="background-color: #9C27B0;" data-color="#9C27B0"></span>
-                        <span class="color-dot" style="background-color: #3F51B5;" data-color="#3F51B5"></span>
-                        <span class="color-dot" style="background-color: #000000;" data-color="#000000"></span>
-                        <span class="color-dot" style="background-color: #ffffff; border: 1px solid #ccc;" data-color="#ffffff"></span>
-                    </div>
+                        <h3><i class="fas fa-paint-brush"></i> Header Color</h3>
+                        <div class="setting-item">
+                            <span>Choose title color</span>
+                            <input type="color" id="header-color-picker" value="#4CAF50">
+                        </div>
                     </div>
                 </div>
 

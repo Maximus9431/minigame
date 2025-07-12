@@ -1856,6 +1856,23 @@ document.addEventListener('DOMContentLoaded', () => {
         tabsContainer.classList.remove('dragging');
     });
 
+    const titleText = document.getElementById('title-text');
+    const colorPicker = document.getElementById('header-color-picker');
+
+    // Восстановление цвета из localStorage
+    const savedColor = localStorage.getItem('headerColor');
+    if (savedColor) {
+        titleText.style.color = savedColor;
+        colorPicker.value = savedColor;
+    }
+
+    // При изменении пользователем — применить и сохранить
+    colorPicker.addEventListener('input', (e) => {
+        const selectedColor = e.target.value;
+        titleText.style.color = selectedColor;
+        localStorage.setItem('headerColor', selectedColor);
+    });
+
     showTab('tab-game');
 
     setInterval(gameTick, 1000);
